@@ -1,0 +1,55 @@
+{
+  "description": "新用户注册时的操作清单",
+  "version": "1.0",
+  "operations": {
+    "csv_operations": {
+      "file": "users.csv",
+      "columns": [
+        {
+          "name": "username",
+          "type": "user_input",
+          "description": "用户输入的用户名"
+        },
+        {
+          "name": "password",
+          "type": "encrypted",
+          "description": "加密后的用户密码"
+        },
+        {
+          "name": "maxarticle",
+          "type": "default_value",
+          "value": 30,
+          "description": "用户可发布文章的最大数量限制"
+        }
+      ]
+    },
+    "folder_operations": {
+      "base_path": "../workplace",
+      "folders_to_create": [
+        {
+          "path": "{username}",
+          "type": "directory",
+          "description": "用户主文件夹，以用户名命名"
+        },
+        {
+          "path": "{username}/article",
+          "type": "directory",
+          "description": "用户文章存储文件夹"
+        },
+        {
+          "path": "{username}/pics",
+          "type": "directory", 
+          "description": "用户图片存储文件夹"
+        }
+      ]
+    },
+    "conflict_resolution": {
+      "existing_files": "preserve",
+      "description": "如果发现同位置、同类型、同名的文件夹/文件，优先保留现有文件"
+    }
+  },
+  "execution_order": [
+    "csv_operations",
+    "folder_operations"
+  ]
+} 

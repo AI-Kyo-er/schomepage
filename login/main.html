@@ -1,0 +1,3517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schomepage主页生成系统 - 工作站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            overflow: hidden;
+        }
+        
+        /* 顶部工具栏 */
+        .top-toolbar {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            font-size: 14px;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        
+        /* 主布局 */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-right: 1px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+            background: #f8f9fa;
+        }
+        
+        .sidebar-header h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .article-limit {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            border-bottom: 1px solid #e1e5e9;
+        }
+        
+        .section-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .section-header:hover {
+            background: #ecf0f1;
+        }
+        
+        .section-content {
+            padding: 10px;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .btn-secondary {
+            background: #7f8c8d;
+        }
+        
+        .btn-secondary:hover {
+            background: #6c7b7d;
+        }
+        
+        /* 文章列表 */
+        .article-list {
+            list-style: none;
+        }
+        
+        .article-item {
+            padding: 8px 15px;
+            margin: 2px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        
+        .article-item:hover {
+            background: #e9ecef;
+        }
+        
+        .article-item.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .article-name {
+            flex: 1;
+            margin-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .article-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .icon-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 2px;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        /* 主编辑区域 */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        /* 编辑器工具栏 */
+        .editor-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+            padding: 10px 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .toolbar-group {
+            display: flex;
+            gap: 5px;
+            padding-right: 15px;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+        
+        .toolbar-btn {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .toolbar-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .toolbar-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .toolbar-select {
+            padding: 4px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            background: white;
+            font-size: 13px;
+        }
+        
+        /* 编辑器内容区 */
+        .editor-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .canvas {
+            background: white;
+            min-height: 800px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 40px;
+            position: relative;
+            cursor: text;
+        }
+        
+        /* 可编辑元素 */
+        .editable-element {
+            position: relative;
+            min-height: 20px;
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px dashed transparent;
+            cursor: text;
+        }
+        
+        .editable-element:hover {
+            border-color: #3498db;
+        }
+        
+        .editable-element.selected {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.05);
+        }
+        
+        .element-controls {
+            position: absolute;
+            top: -25px;
+            right: 0;
+            display: none;
+            gap: 2px;
+        }
+        
+        .editable-element.selected .element-controls {
+            display: flex;
+        }
+        
+        .control-btn {
+            width: 20px;
+            height: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        
+        /* 图片元素 */
+        .image-element {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+        
+        /* 右侧属性面板 */
+        .properties-panel {
+            width: 280px;
+            background: white;
+            border-left: 1px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .property-group {
+            margin-bottom: 20px;
+        }
+        
+        .property-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .property-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        
+        .color-picker {
+            width: 100%;
+            height: 30px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        /* 素材库 */
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .asset-item {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .asset-item:hover {
+            background: #e9ecef;
+            border-color: #3498db;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .asset-item img {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: contain;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+        
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .properties-panel {
+                width: 220px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .properties-panel {
+                display: none;
+            }
+        }
+        
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #7f8c8d;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 40px 20px;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        /* 访客统计样式 */
+        .visitor-stats-list {
+            list-style: none;
+        }
+        
+        .visitor-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+            font-size: 13px;
+        }
+        
+        .visitor-stat-item:hover {
+            background: #e9ecef;
+        }
+        
+        .visitor-identity {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .visitor-count {
+            background: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            min-width: 24px;
+            text-align: center;
+        }
+        
+        .no-visitors {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        /* 验证码输入组样式 */
+        .verification-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .verification-input-group input {
+            flex: 1;
+        }
+        .verification-input-group button {
+            flex: 0 0 auto;
+            width: 100px;
+        }
+        
+        /* 人机验证样式 */
+        .captcha-container {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .captcha-container h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .captcha-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            font-size: 16px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+        .captcha-checkbox input {
+            width: auto;
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+        .captcha-checkbox label {
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        /* 密码强度样式 */
+        .password-strength {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .strength-weak { color: #e74c3c; }
+        .strength-medium { color: #f39c12; }
+        .strength-strong { color: #27ae60; }
+        .strength-very-strong { color: #2ecc71; }
+        
+        /* 错误和成功消息样式 */
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+        }
+        .success-message {
+            color: #27ae60;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部工具栏 -->
+    <div class="top-toolbar">
+        <div class="logo">Schomepage主页生成系统</div>
+        <div class="user-controls">
+            <div class="user-info">
+                <span>欢迎，<span id="currentUser">用户</span></span>
+                <span class="article-limit" id="articleLimit"></span>
+            </div>
+            <button class="logout-btn" onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 主布局 -->
+    <div class="main-layout">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>我的文章</h3>
+                <div class="article-limit" id="sidebarArticleLimit">加载中...</div>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- 文章管理 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('articles')">📄 文章管理</div>
+                    <div class="section-content" id="articles">
+                        <button class="btn btn-success" onclick="createNewArticle()">➕ 新建文章</button>
+                        <ul class="article-list" id="articleList">
+                            <li class="loading">加载文章列表...</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 素材库 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('assets')">🎨 素材库</div>
+                    <div class="section-content" id="assets" style="display: none;">
+                        <button class="btn btn-secondary" onclick="showAssetLibrary('backgrounds')">背景图片</button>
+                        <button class="btn btn-secondary" onclick="showAssetLibrary('icons')">图标库</button>
+                        <button class="btn btn-secondary" onclick="showMyPictures()">我的图片</button>
+                    </div>
+                </div>
+                
+                <!-- 模板库 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('templates')">📋 模板库</div>
+                    <div class="section-content" id="templates" style="display: none;">
+                        <button class="btn btn-secondary" onclick="applyTemplate('article')">文章模板</button>
+                        <button class="btn btn-secondary" onclick="applyTemplate('blog')">博客模板</button>
+                        <button class="btn btn-secondary" onclick="applyTemplate('news')">新闻模板</button>
+                    </div>
+                </div>
+
+                <!-- 访客统计 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('visitor-stats')">📊 访客统计</div>
+                    <div class="section-content" id="visitor-stats" style="display: none;">
+                        <div id="visitorStatsContent">
+                            <div class="loading">加载访客统计...</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="refreshVisitorStats()">🔄 刷新统计</button>
+                    </div>
+                </div>
+
+                <!-- 修改密码 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('change-password')">🔑 修改密码</div>
+                    <div class="section-content" id="change-password" style="display: none;">
+                        <button class="btn btn-secondary" onclick="showChangePasswordModal()">🔑 修改密码</button>
+                    </div>
+                </div>
+
+                <!-- 访客通道 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('visitor-access')">🌐 访客通道</div>
+                    <div class="section-content" id="visitor-access" style="display: none;">
+                        <button class="btn btn-secondary" onclick="showVisitorAccessModal()">🌐 管理访客链接</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主编辑区域 -->
+        <div class="editor-area">
+            <!-- 编辑器工具栏 -->
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="saveArticle()" title="保存">💾</button>
+                    <button class="toolbar-btn" onclick="previewArticle()" title="预览">👁️</button>
+                    <button class="toolbar-btn" onclick="exportArticle()" title="导出">📤</button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="undo()" title="撤销">↶</button>
+                    <button class="toolbar-btn" onclick="redo()" title="重做">↷</button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <select class="toolbar-select" id="fontFamily" onchange="changeFontFamily()">
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="Times New Roman, serif">Times New Roman</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="Microsoft YaHei, sans-serif">微软雅黑</option>
+                        <option value="SimSun, serif">宋体</option>
+                    </select>
+                    
+                    <select class="toolbar-select" id="fontSize" onchange="changeFontSize()">
+                        <option value="12px">12px</option>
+                        <option value="14px">14px</option>
+                        <option value="16px" selected>16px</option>
+                        <option value="18px">18px</option>
+                        <option value="20px">20px</option>
+                        <option value="24px">24px</option>
+                        <option value="32px">32px</option>
+                    </select>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="toggleBold()" id="boldBtn" title="粗体">B</button>
+                    <button class="toolbar-btn" onclick="toggleItalic()" id="italicBtn" title="斜体">I</button>
+                    <button class="toolbar-btn" onclick="toggleUnderline()" id="underlineBtn" title="下划线">U</button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="setAlignment('left')" title="左对齐">⬅</button>
+                    <button class="toolbar-btn" onclick="setAlignment('center')" title="居中">⬌</button>
+                    <button class="toolbar-btn" onclick="setAlignment('right')" title="右对齐">➡</button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="insertTextBox()" title="插入文本框">📝</button>
+                    <button class="toolbar-btn" onclick="insertImage()" title="插入图片">🖼️</button>
+                    <button class="toolbar-btn" onclick="insertLink()" title="插入链接">🔗</button>
+                    <button class="toolbar-btn" onclick="toggleDynamicHide()" title="动态隐藏模块">🎭</button>
+                </div>
+            </div>
+            
+            <!-- 编辑器内容区 -->
+            <div class="editor-content">
+                <div class="canvas-container">
+                    <div class="canvas" id="canvas">
+                        <div class="empty-state" id="emptyState">
+                            <h3>开始创作您的文章</h3>
+                            <p>点击工具栏按钮添加文本、图片或其他元素</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧属性面板 -->
+        <div class="properties-panel">
+            <div class="panel-header">属性面板</div>
+            <div class="panel-content" id="propertiesContent">
+                <div class="empty-state">
+                    <p>选择元素以编辑属性</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="assetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">素材库</h3>
+                <button class="close-btn" onclick="closeModal('assetModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <div class="loading">加载素材...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>插入图片</h3>
+                <button class="close-btn" onclick="closeModal('imageModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload()">
+                    <p style="margin-top: 10px; font-size: 13px; color: #7f8c8d;">
+                        或者从素材库选择背景图片
+                    </p>
+                    <div class="assets-grid" id="backgroundAssets">
+                        <!-- 背景图片将在这里动态加载 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="myPicturesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>我的图片</h3>
+                <button class="close-btn" onclick="closeModal('myPicturesModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <input type="file" id="uploadImageFile" accept=".png,.jpg,.jpeg" multiple style="display: none;" onchange="handleMyImageUpload()">
+                    <button class="btn btn-success" onclick="document.getElementById('uploadImageFile').click()">📤 导入图片</button>
+                    <p style="margin-top: 8px; font-size: 12px; color: #7f8c8d;">支持 PNG、JPG 格式</p>
+                </div>
+                <div id="myPicturesContent">
+                    <div class="loading">加载我的图片...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="linkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>插入文章链接</h3>
+                <button class="close-btn" onclick="closeModal('linkModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-group">
+                    <label class="property-label">链接文本</label>
+                    <input type="text" id="linkText" class="property-input" placeholder="请输入链接显示的文本" value="点击这里">
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">选择目标文章</label>
+                    <div id="linkTargetList">
+                        <div class="loading">加载文章列表...</div>
+                    </div>
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">链接类型</label>
+                    <select id="linkType" class="property-input">
+                        <option value="text">文本链接</option>
+                        <option value="image">图片链接（将选中的图片设为链接）</option>
+                    </select>
+                </div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="closeModal('linkModal')" style="margin-right: 10px;">取消</button>
+                    <button class="btn btn-success" onclick="insertLinkElement()">插入链接</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码模态框 -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改密码</h3>
+                <button class="close-btn" onclick="closeModal('changePasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-group">
+                    <label class="property-label">当前密码</label>
+                    <input type="password" id="currentPassword" class="property-input" placeholder="请输入当前密码">
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">验证码</label>
+                    <div class="verification-input-group">
+                        <input type="text" id="changePasswordVerificationCode" class="property-input" placeholder="请输入验证码">
+                        <button class="btn btn-secondary" onclick="sendChangePasswordCode()" id="sendChangePasswordCodeBtn">发送验证码</button>
+                    </div>
+                    <div id="changePasswordCountdown" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+                </div>
+                
+                <div id="changePasswordErrorMessage" class="error-message" style="display: none;"></div>
+                <div id="changePasswordSuccessMessage" class="success-message" style="display: none;"></div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="closeModal('changePasswordModal')" style="margin-right: 10px;">取消</button>
+                    <button class="btn btn-success" onclick="proceedToNewPassword()">下一步</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置新密码模态框 -->
+    <div class="modal" id="newPasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>设置新密码</h3>
+                <button class="close-btn" onclick="closeModal('newPasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-group">
+                    <label class="property-label">新密码</label>
+                    <input type="password" id="newPassword" class="property-input" placeholder="请输入新密码 (6-16位)" oninput="checkNewPasswordStrength()">
+                </div>
+                
+                <div class="property-group">
+                    <label class="property-label">确认新密码</label>
+                    <input type="password" id="confirmNewPassword" class="property-input" placeholder="请再次输入新密码">
+                </div>
+                
+                <div id="newPasswordStrength" class="password-strength"></div>
+                <div id="newPasswordErrorMessage" class="error-message" style="display: none;"></div>
+                <div id="newPasswordSuccessMessage" class="success-message" style="display: none;"></div>
+                
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="closeModal('newPasswordModal')" style="margin-right: 10px;">取消</button>
+                    <button class="btn btn-success" onclick="updateUserPassword()">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 人机验证模态框（修改密码用） -->
+    <div class="modal" id="changePasswordCaptchaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close-btn" onclick="closeModal('changePasswordCaptchaModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="captcha-container">
+                    <h3>安全验证</h3>
+                    <div class="captcha-checkbox">
+                        <input type="checkbox" id="changePasswordRobotCheck" onchange="handleChangePasswordCaptcha()">
+                        <label for="changePasswordRobotCheck">点击这里，确保您不是机器人</label>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-success" onclick="confirmChangePasswordCaptcha()" id="changePasswordCaptchaConfirm" disabled>确认</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 访客通道模态框 -->
+    <div class="modal" id="visitorAccessModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>访客通道管理</h3>
+                <button class="close-btn" onclick="closeModal('visitorAccessModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <h4>我的访客链接</h4>
+                    <div id="visitorLinksList">
+                        <div class="loading">加载访客链接...</div>
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                    <h4>添加新的访客链接</h4>
+                    <div class="property-group">
+                        <label class="property-label">选择文章</label>
+                        <select id="visitorArticleSelect" class="property-input">
+                            <option value="">请选择文章</option>
+                        </select>
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">别名</label>
+                        <input type="text" id="visitorAlias" class="property-input" placeholder="输入访客访问的别名">
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 15px;">
+                        <button class="btn btn-success" onclick="addVisitorLink()">添加链接</button>
+                    </div>
+                </div>
+                
+                <div id="visitorAccessErrorMessage" class="error-message" style="display: none;"></div>
+                <div id="visitorAccessSuccessMessage" class="success-message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script src="editor.js"></script>
+    <script src="crypto.js"></script>
+    <script>
+        // 全局变量
+        let currentUser = '';
+        let currentArticle = null;
+        let selectedElement = null;
+        let undoStack = [];
+        let redoStack = [];
+        let maxArticles = 0;
+        let articleCount = 0;
+
+        // 页面初始化
+        window.onload = function() {
+            debugLog('编辑器页面加载完成');
+            checkAuth();
+            initializeEditor();
+            setupUndoRedoListeners(); // 设置撤销重做监听器
+        };
+
+        function initializeEditor() {
+            currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('currentUser').textContent = currentUser;
+                loadUserArticles();
+                loadUserLimits();
+                loadBackgroundAssets();
+                loadVisitorStats(); // 加载访客统计
+                
+                // 初始化撤销栈
+                setTimeout(() => {
+                    saveInitialStateToUndoStack();
+                }, 500); // 延迟初始化，确保页面完全加载
+            }
+        }
+
+        // 🔧 修复1: 初始化撤销栈
+        function saveInitialStateToUndoStack() {
+            const initialState = getCanvasContent();
+            undoStack.push(initialState);
+            console.log('初始状态已保存到撤销栈');
+        }
+
+        // 🔧 修复2: 自定义对话框替换prompt
+        function showCustomPrompt(message, defaultValue = '') {
+            return new Promise((resolve) => {
+                // 创建自定义对话框
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.style.display = 'block';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>输入信息</h3>
+                        </div>
+                        <p>${message}</p>
+                        <input type="text" id="promptInput" value="${defaultValue}" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+                        <div style="text-align: right; margin-top: 15px;">
+                            <button onclick="closeCustomPrompt(false)" style="margin-right: 10px; padding: 8px 15px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">取消</button>
+                            <button onclick="closeCustomPrompt(true)" style="padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">确定</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                document.getElementById('promptInput').focus();
+                
+                // 处理回车键
+                document.getElementById('promptInput').addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        closeCustomPrompt(true);
+                    }
+                });
+                
+                window.closeCustomPrompt = function(confirmed) {
+                    const value = confirmed ? document.getElementById('promptInput').value : null;
+                    document.body.removeChild(modal);
+                    delete window.closeCustomPrompt;
+                    resolve(value);
+                };
+            });
+        }
+
+        // 加载用户文章限制
+        async function loadUserLimits() {
+            try {
+                const response = await fetch('/api/user_limits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    maxArticles = data.maxarticle;
+                    updateArticleLimitDisplay();
+                }
+            } catch (error) {
+                console.error('加载用户限制失败:', error);
+            }
+        }
+
+        // 更新文章限制显示
+        function updateArticleLimitDisplay() {
+            const limitText = `(${articleCount}/${maxArticles})`;
+            document.getElementById('articleLimit').textContent = limitText;
+            document.getElementById('sidebarArticleLimit').textContent = limitText;
+        }
+
+        // 加载用户文章列表
+        async function loadUserArticles() {
+            try {
+                const response = await fetch('/api/user_articles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    articleCount = data.articles.length;
+                    updateArticleLimitDisplay();
+                    displayArticleList(data.articles);
+                } else {
+                    showError('加载文章列表失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('加载文章列表失败:', error);
+                showError('网络错误，无法加载文章列表');
+            }
+        }
+
+        // 显示文章列表
+        function displayArticleList(articles) {
+            const articleList = document.getElementById('articleList');
+            if (articles.length === 0) {
+                articleList.innerHTML = '<li class="empty-state"><p>还没有文章</p></li>';
+                return;
+            }
+
+            articleList.innerHTML = articles.map(article => `
+                <li class="article-item" onclick="loadArticle('${article.filename}')">
+                    <span class="article-name" title="${article.name}">${article.name}</span>
+                    <div class="article-actions">
+                        <button class="icon-btn" onclick="event.stopPropagation(); renameArticle('${article.filename}')" title="重命名">✏️</button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); deleteArticle('${article.filename}')" title="删除">🗑️</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // 切换侧边栏部分
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 新建文章
+        async function createNewArticle() {
+            if (articleCount >= maxArticles) {
+                alert(`您已达到文章数量限制 (${maxArticles}篇)，请删除一些文章后再创建新文章。`);
+                return;
+            }
+
+            // 🔧 修复：使用自定义对话框
+            const name = await showCustomPrompt('请输入文章名称:', 'article');
+            if (!name) return;
+
+            try {
+                const response = await fetch('/api/create_article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        name: name
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // 更新文章列表
+                    await loadUserArticles();
+                    // 加载新创建的文章 - 修复加载问题
+                    currentArticle = data.filename;
+                    await loadArticleContent(data.filename);
+                } else {
+                    showError('创建文章失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('创建文章失败:', error);
+                showError('网络错误，无法创建文章');
+            }
+        }
+
+        // 加载文章内容的辅助函数
+        async function loadArticleContent(filename) {
+            try {
+                const response = await fetch('/api/load_article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        filename: filename
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    loadContentToCanvas(data.content);
+                    
+                    // 更新活动文章显示
+                    document.querySelectorAll('.article-item').forEach(item => {
+                        item.classList.remove('active');
+                        if (item.onclick.toString().includes(filename)) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    showError('加载文章失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('加载文章失败:', error);
+                showError('网络错误，无法加载文章');
+            }
+        }
+
+        // 加载文章
+        async function loadArticle(filename) {
+            currentArticle = filename;
+            await loadArticleContent(filename);
+        }
+
+        // 保存文章
+        async function saveArticle() {
+            if (!currentArticle) {
+                alert('请先选择或创建一篇文章');
+                return;
+            }
+
+            const content = getCanvasContent();
+            
+            try {
+                const response = await fetch('/api/save_article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        filename: currentArticle,
+                        content: content
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showSuccess('文章保存成功');
+                } else {
+                    showError('保存文章失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('保存文章失败:', error);
+                showError('网络错误，无法保存文章');
+            }
+        }
+
+        // 获取画布内容 - 修改为移除所有控制元素
+        function getCanvasContent() {
+            const canvas = document.getElementById('canvas');
+            const emptyState = document.getElementById('emptyState');
+            
+            // 创建画布的副本来处理，避免影响原始内容
+            const canvasCopy = canvas.cloneNode(true);
+            
+            // 移除空状态
+            const emptyStateInCopy = canvasCopy.querySelector('#emptyState');
+            if (emptyStateInCopy) {
+                emptyStateInCopy.remove();
+            }
+            
+            // 移除所有选中状态
+            canvasCopy.querySelectorAll('.editable-element').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 移除所有控制按钮
+            canvasCopy.querySelectorAll('.element-controls').forEach(controls => {
+                controls.remove();
+            });
+            
+            // 🔧 修复1: 移除所有隐藏指示器（仅在编辑模式下显示）
+            canvasCopy.querySelectorAll('.hide-indicator').forEach(indicator => {
+                indicator.remove();
+            });
+            
+            return canvasCopy.innerHTML;
+        }
+
+        // 加载内容到画布
+        function loadContentToCanvas(content) {
+            const canvas = document.getElementById('canvas');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (content && content.trim() !== '') {
+                canvas.innerHTML = content;
+                if (emptyState) emptyState.style.display = 'none';
+                
+                // 重新绑定事件
+                bindElementEvents();
+            } else {
+                canvas.innerHTML = '<div class="empty-state" id="emptyState"><h3>开始创作您的文章</h3><p>点击工具栏按钮添加文本、图片或其他元素</p></div>';
+            }
+        }
+
+        // 绑定元素事件
+        function bindElementEvents() {
+            document.querySelectorAll('.editable-element').forEach(element => {
+                element.addEventListener('click', selectElement);
+                // 更新动态隐藏指示器
+                updateElementHideIndicator(element);
+            });
+        }
+
+        // 插入文本框
+        function insertTextBox() {
+            // 先保存当前状态到撤销栈
+            saveStateToUndoStack();
+            
+            const canvas = document.getElementById('canvas');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (emptyState) emptyState.style.display = 'none';
+            
+            const textBox = document.createElement('div');
+            textBox.className = 'editable-element';
+            textBox.contentEditable = true;
+            textBox.innerHTML = `
+                点击这里输入文本...
+                <div class="element-controls">
+                    <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                    <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                    <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                </div>
+            `;
+            
+            canvas.appendChild(textBox);
+            textBox.addEventListener('click', selectElement);
+            
+            selectElement({ target: textBox });
+            
+            // 选中文本以便编辑
+            textBox.focus();
+            const range = document.createRange();
+            range.selectNodeContents(textBox);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            console.log('文本框已插入');
+        }
+
+        // 插入图片
+        function insertImage() {
+            document.getElementById('imageModal').style.display = 'block';
+        }
+
+        // 处理图片上传
+        function handleImageUpload() {
+            const file = document.getElementById('imageFile').files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                insertImageElement(e.target.result);
+                closeModal('imageModal');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 插入图片元素 - 修复图片显示问题
+        function insertImageElement(src) {
+            console.log('插入图片:', src);
+            
+            // 先保存当前状态到撤销栈
+            saveStateToUndoStack();
+            
+            const canvas = document.getElementById('canvas');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (emptyState) emptyState.style.display = 'none';
+            
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'editable-element';
+            
+            // 🔧 修复图片路径处理逻辑
+            let imageSrc = src;
+            
+            // 对于"我的图片"（用户图片API），保持原路径
+            if (src.startsWith('/api/get_user_picture/')) {
+                imageSrc = src;
+                console.log('✅ 用户图片路径:', imageSrc);
+            }
+            // 对于背景图片，使用完整路径
+            else if (!src.startsWith('http') && !src.startsWith('/workplace/share/') && !src.startsWith('/api/')) {
+                imageSrc = '/workplace/share/backgrounds/' + src;
+                console.log('✅ 背景图片路径:', imageSrc);
+            }
+            // 其他情况保持原路径
+            else {
+                imageSrc = src;
+                console.log('✅ 其他图片路径:', imageSrc);
+            }
+            
+            imageContainer.innerHTML = `
+                <img src="${imageSrc}" class="image-element" style="max-width: 100%; height: auto; display: block; margin: 0 auto 0 0;" onload="console.log('图片加载成功:', this.src)" onerror="console.error('图片加载失败:', this.src); this.style.border='2px solid red'; this.alt='图片加载失败: ' + this.src;">
+                <div class="element-controls">
+                    <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                    <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                    <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                </div>
+            `;
+            
+            canvas.appendChild(imageContainer);
+            imageContainer.addEventListener('click', selectElement);
+            selectElement({ target: imageContainer });
+            
+            console.log('✅ 图片元素已插入，最终路径:', imageSrc);
+        }
+
+        // 选择元素
+        function selectElement(event) {
+            // 清除之前的选中状态
+            document.querySelectorAll('.editable-element').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            const element = event.target.closest('.editable-element');
+            if (element) {
+                element.classList.add('selected');
+                selectedElement = element;
+                showElementProperties(element);
+            }
+        }
+
+        // 显示元素属性
+        function showElementProperties(element) {
+            const propertiesContent = document.getElementById('propertiesContent');
+            const isTextElement = element.contentEditable === 'true';
+            const isImageElement = element.querySelector('.image-element');
+            
+            let propertiesHTML = '<div class="property-group">';
+            
+            if (isTextElement) {
+                propertiesHTML += `
+                    <label class="property-label">字体颜色</label>
+                    <input type="color" class="color-picker" value="#000000" onchange="changeTextColor(this.value)">
+                    
+                    <label class="property-label">背景颜色</label>
+                    <input type="color" class="color-picker" value="#ffffff" onchange="changeBackgroundColor(this.value)">
+                    
+                    <label class="property-label">内边距</label>
+                    <input type="range" class="property-input" min="0" max="50" value="5" onchange="changePadding(this.value)">
+                `;
+            }
+            
+            if (isImageElement) {
+                propertiesHTML += `
+                    <label class="property-label">宽度 (%)</label>
+                    <input type="range" class="property-input" min="10" max="100" value="100" onchange="changeImageWidth(this.value)">
+                `;
+            }
+            
+            // 动态隐藏设置 - 适用于所有元素
+            const hideRule = element.getAttribute('data-hide-rule') || 'none';
+            const hideUsers = element.getAttribute('data-hide-users') || '';
+            
+            propertiesHTML += `
+                <div style="border-top: 1px solid #eee; margin-top: 15px; padding-top: 15px;">
+                    <label class="property-label">🎭 动态隐藏模块</label>
+                    <select class="property-input" id="hideRuleSelect" onchange="changeHideRule(this.value)">
+                        <option value="none" ${hideRule === 'none' ? 'selected' : ''}>不启用隐藏</option>
+                        <option value="show-only" ${hideRule === 'show-only' ? 'selected' : ''}>只给谁看</option>
+                        <option value="hide-for" ${hideRule === 'hide-for' ? 'selected' : ''}>不给谁看</option>
+                    </select>
+                    
+                    <div id="hideUsersContainer" style="margin-top: 10px; ${hideRule === 'none' ? 'display: none;' : ''}">
+                        <label class="property-label">人群标识 (用逗号分隔)</label>
+                        <input type="text" class="property-input" id="hideUsersInput" 
+                               value="${hideUsers}" 
+                               placeholder="例如: student,tourist,teacher"
+                               onchange="changeHideUsers(this.value)">
+                    </div>
+                </div>
+            `;
+            
+            propertiesHTML += '</div>';
+            propertiesContent.innerHTML = propertiesHTML;
+        }
+
+        // 删除元素
+        function deleteElement(btn) {
+            const element = btn.closest('.editable-element');
+            if (element && confirm('确定要删除这个元素吗？')) {
+                // 先保存当前状态到撤销栈
+                saveStateToUndoStack();
+                
+                element.remove();
+                selectedElement = null;
+                document.getElementById('propertiesContent').innerHTML = '<div class="empty-state"><p>选择元素以编辑属性</p></div>';
+                
+                // 检查是否需要显示空状态
+                const canvas = document.getElementById('canvas');
+                if (canvas.children.length === 0) {
+                    canvas.innerHTML = '<div class="empty-state" id="emptyState"><h3>开始创作您的文章</h3><p>点击工具栏按钮添加文本、图片或其他元素</p></div>';
+                }
+                
+                console.log('元素已删除');
+            }
+        }
+
+        // 移动元素
+        function moveUp(btn) {
+            const element = btn.closest('.editable-element');
+            const prev = element.previousElementSibling;
+            if (prev && !prev.classList.contains('empty-state')) {
+                element.parentNode.insertBefore(element, prev);
+            }
+        }
+
+        function moveDown(btn) {
+            const element = btn.closest('.editable-element');
+            const next = element.nextElementSibling;
+            if (next) {
+                element.parentNode.insertBefore(next, element);
+            }
+        }
+
+        // 格式化工具
+        function toggleBold() {
+            document.execCommand('bold');
+            updateToolbarState();
+        }
+
+        function toggleItalic() {
+            document.execCommand('italic');
+            updateToolbarState();
+        }
+
+        function toggleUnderline() {
+            document.execCommand('underline');
+            updateToolbarState();
+        }
+
+        function setAlignment(align) {
+            if (selectedElement) {
+                // 检查元素是否包含图片
+                const img = selectedElement.querySelector('.image-element');
+                if (img) {
+                    // 对图片元素进行对齐
+                    selectedElement.style.textAlign = align;
+                    selectedElement.style.display = 'block';
+                    selectedElement.style.width = '100%';
+                    
+                    // 为图片添加额外的对齐样式确保生效
+                    if (align === 'center') {
+                        img.style.margin = '0 auto';
+                        img.style.display = 'block';
+                    } else if (align === 'right') {
+                        img.style.margin = '0 0 0 auto';
+                        img.style.display = 'block';
+                    } else { // left
+                        img.style.margin = '0 auto 0 0';
+                        img.style.display = 'block';
+                    }
+                } else {
+                    // 对文本元素进行对齐
+                    selectedElement.style.textAlign = align;
+                }
+                console.log(`设置对齐方式: ${align}，元素类型: ${img ? '图片' : '文本'}`);
+            } else {
+                console.log('未选中任何元素');
+            }
+        }
+
+        function changeFontFamily() {
+            const fontFamily = document.getElementById('fontFamily').value;
+            if (selectedElement) {
+                selectedElement.style.fontFamily = fontFamily;
+            }
+        }
+
+        function changeFontSize() {
+            const fontSize = document.getElementById('fontSize').value;
+            if (selectedElement) {
+                selectedElement.style.fontSize = fontSize;
+            }
+        }
+
+        // 属性修改函数
+        function changeTextColor(color) {
+            if (selectedElement) {
+                selectedElement.style.color = color;
+            }
+        }
+
+        function changeBackgroundColor(color) {
+            if (selectedElement) {
+                selectedElement.style.backgroundColor = color;
+            }
+        }
+
+        function changePadding(value) {
+            if (selectedElement) {
+                selectedElement.style.padding = value + 'px';
+            }
+        }
+
+        function changeImageWidth(value) {
+            if (selectedElement) {
+                const img = selectedElement.querySelector('.image-element');
+                if (img) {
+                    img.style.width = value + '%';
+                }
+            }
+        }
+
+        // 🎭 动态隐藏模块功能
+
+        // 切换动态隐藏功能
+        function toggleDynamicHide() {
+            if (!selectedElement) {
+                alert('请先选择一个元素（文本框或图片）');
+                return;
+            }
+            
+            // 如果当前元素没有隐藏规则，设置为"只给谁看"
+            const currentRule = selectedElement.getAttribute('data-hide-rule') || 'none';
+            if (currentRule === 'none') {
+                selectedElement.setAttribute('data-hide-rule', 'show-only');
+                selectedElement.setAttribute('data-hide-users', '');
+                showSuccess('已启用动态隐藏功能，请在右侧设置具体规则');
+            } else {
+                selectedElement.removeAttribute('data-hide-rule');
+                selectedElement.removeAttribute('data-hide-users');
+                showSuccess('已关闭动态隐藏功能');
+            }
+            
+            // 更新属性面板
+            showElementProperties(selectedElement);
+            
+            // 更新元素样式指示
+            updateElementHideIndicator(selectedElement);
+        }
+
+        // 修改隐藏规则
+        function changeHideRule(rule) {
+            if (!selectedElement) return;
+            
+            if (rule === 'none') {
+                selectedElement.removeAttribute('data-hide-rule');
+                selectedElement.removeAttribute('data-hide-users');
+                document.getElementById('hideUsersContainer').style.display = 'none';
+            } else {
+                selectedElement.setAttribute('data-hide-rule', rule);
+                document.getElementById('hideUsersContainer').style.display = 'block';
+            }
+            
+            updateElementHideIndicator(selectedElement);
+            console.log(`设置隐藏规则: ${rule}`);
+        }
+
+        // 修改隐藏用户列表
+        function changeHideUsers(users) {
+            if (!selectedElement) return;
+            
+            // 清理用户输入，移除多余空格
+            const cleanUsers = users.split(',').map(u => u.trim()).filter(u => u).join(',');
+            selectedElement.setAttribute('data-hide-users', cleanUsers);
+            
+            updateElementHideIndicator(selectedElement);
+            console.log(`设置隐藏用户: ${cleanUsers}`);
+        }
+
+        // 更新元素的隐藏指示器
+        function updateElementHideIndicator(element) {
+            // 移除现有的指示器
+            const existingIndicator = element.querySelector('.hide-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            const hideRule = element.getAttribute('data-hide-rule');
+            const hideUsers = element.getAttribute('data-hide-users');
+            
+            if (hideRule && hideRule !== 'none' && hideUsers) {
+                const indicator = document.createElement('div');
+                indicator.className = 'hide-indicator';
+                indicator.style.cssText = `
+                    position: absolute;
+                    top: -12px;
+                    left: -5px;
+                    background: #e74c3c;
+                    color: white;
+                    font-size: 10px;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    z-index: 100;
+                    pointer-events: none;
+                `;
+                
+                const ruleText = hideRule === 'show-only' ? '仅显示' : '隐藏';
+                indicator.textContent = `🎭 ${ruleText}: ${hideUsers}`;
+                
+                element.style.position = 'relative';
+                element.appendChild(indicator);
+            }
+        }
+
+        // 应用动态隐藏规则（访客查看时使用）
+        function applyDynamicHideRules(userType) {
+            console.log('应用动态隐藏规则，用户类型:', userType);
+            
+            const elements = document.querySelectorAll('[data-hide-rule]');
+            elements.forEach(element => {
+                const hideRule = element.getAttribute('data-hide-rule');
+                const hideUsers = element.getAttribute('data-hide-users');
+                
+                if (!hideRule || !hideUsers) return;
+                
+                const userList = hideUsers.split(',').map(u => u.trim());
+                let shouldHide = false;
+                
+                if (hideRule === 'show-only') {
+                    // 只给指定用户看：如果当前用户不在列表中，则隐藏
+                    shouldHide = !userList.includes(userType);
+                } else if (hideRule === 'hide-for') {
+                    // 不给指定用户看：如果当前用户在列表中，则隐藏
+                    shouldHide = userList.includes(userType);
+                }
+                
+                if (shouldHide) {
+                    element.style.display = 'none';
+                    console.log(`隐藏元素，规则: ${hideRule}, 用户: ${userType}`);
+                } else {
+                    element.style.display = '';
+                    console.log(`显示元素，规则: ${hideRule}, 用户: ${userType}`);
+                }
+            });
+        }
+
+        // 更新工具栏状态
+        function updateToolbarState() {
+            document.getElementById('boldBtn').classList.toggle('active', document.queryCommandState('bold'));
+            document.getElementById('italicBtn').classList.toggle('active', document.queryCommandState('italic'));
+            document.getElementById('underlineBtn').classList.toggle('active', document.queryCommandState('underline'));
+        }
+
+        // 模态框管理
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 🔧 修复4: 加载背景素材 - 修复路径问题
+        function loadBackgroundAssets() {
+            const backgroundAssets = document.getElementById('backgroundAssets');
+            // 获取系统中的背景图片
+            fetch('/api/get_shared_assets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ type: 'backgrounds' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.assets.length > 0) {
+                    backgroundAssets.innerHTML = data.assets.map(asset => {
+                        if (asset.type === 'file' && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(asset.name)) {
+                            return `
+                                <div class="asset-item" onclick="insertImageElement('/workplace/share/backgrounds/${asset.name}')" title="${asset.name}">
+                                    <img src="/workplace/share/backgrounds/${asset.name}" alt="${asset.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                </div>
+                            `;
+                        }
+                        return '';
+                    }).join('');
+                } else {
+                    backgroundAssets.innerHTML = '<p style="color: #7f8c8d; text-align: center;">暂无背景图片</p>';
+                }
+            })
+            .catch(error => {
+                console.error('加载背景图片失败:', error);
+                backgroundAssets.innerHTML = '<p style="color: #e74c3c; text-align: center;">加载失败</p>';
+            });
+        }
+
+        // 🔧 修复5: 改善素材库预览 - 显示预览图而不是文件名
+        function generateAssetGrid(assets, assetType) {
+            let html = '<div class="assets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; padding: 10px;">';
+            
+            assets.forEach(asset => {
+                if (asset.type === 'file') {
+                    const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(asset.name);
+                    
+                    if (isImage && (assetType === 'backgrounds' || assetType === 'icons' || assetType === 'mypictures')) {
+                        // 🔧 修复4: 使用API返回的完整路径，而不是拼接路径
+                        const assetPath = asset.path || `/workplace/share/${assetType}/${asset.name}`;
+                        
+                        html += `
+                            <div class="asset-item" onclick="insertImageElement('${assetPath}')" title="${asset.name}" style="
+                                cursor: pointer; 
+                                border: 2px solid #e1e5e9; 
+                                border-radius: 10px; 
+                                padding: 8px; 
+                                transition: all 0.3s ease;
+                                background: white;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                                overflow: hidden;
+                                width: 120px;
+                                height: 120px;
+                            " onmouseover="this.style.borderColor='#3498db'; this.style.transform='scale(1.05)'" onmouseout="this.style.borderColor='#e1e5e9'; this.style.transform='scale(1)'">
+                                <div style="
+                                    width: 100%; 
+                                    height: 100%; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center;
+                                    overflow: hidden;
+                                    border-radius: 6px;
+                                    background: #f8f9fa;
+                                ">
+                                    <img src="${assetPath}" alt="${asset.name}" style="
+                                        max-width: 100%; 
+                                        max-height: 100%; 
+                                        object-fit: contain; 
+                                        display: block;
+                                    " onerror="this.style.display='none'; this.nextSibling.style.display='flex';" onload="console.log('预览图加载成功:', this.src)">
+                                    <div style="
+                                        display: none;
+                                        align-items: center;
+                                        justify-content: center;
+                                        width: 100%;
+                                        height: 100%;
+                                        font-size: 36px;
+                                        color: #7f8c8d;
+                                    ">📄</div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (assetType === 'icons') {
+                        // 为非图像图标文件显示特殊图标
+                        const assetPath = asset.path || `/workplace/share/${assetType}/${asset.name}`;
+                        html += `
+                            <div class="asset-item" onclick="useAsset('${assetType}', '${asset.name}')" title="${asset.name}" style="
+                                cursor: pointer; 
+                                border: 2px solid #e1e5e9; 
+                                border-radius: 10px; 
+                                padding: 15px; 
+                                text-align: center; 
+                                min-height: 100px; 
+                                display: flex; 
+                                flex-direction: column; 
+                                justify-content: center;
+                                transition: all 0.3s ease;
+                                background: white;
+                            " onmouseover="this.style.borderColor='#3498db'" onmouseout="this.style.borderColor='#e1e5e9'">
+                                <div style="font-size: 36px; margin-bottom: 8px;">📄</div>
+                            </div>
+                        `;
+                    }
+                }
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        // 预览文章
+        function previewArticle() {
+            if (!currentArticle) {
+                alert('请先选择一篇文章');
+                return;
+            }
+            
+            const content = getCanvasContent();
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>文章预览</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            background: #f8f9fa; 
+                            padding: 20px; 
+                            margin: 0;
+                        }
+                        .article-container {
+                            background: white;
+                            max-width: 800px;
+                            margin: 0 auto;
+                            padding: 40px;
+                            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                            border-radius: 5px;
+                        }
+                        .image-element { max-width: 100%; height: auto; }
+                        h1, h2, h3 { color: #2c3e50; }
+                        blockquote {
+                            border-left: 4px solid #3498db;
+                            padding-left: 20px;
+                            margin: 20px 0;
+                            font-style: italic;
+                            color: #7f8c8d;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="article-container">
+                        ${content}
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+
+        // 工具函数
+        function showError(message) {
+            alert('错误: ' + message);
+        }
+
+        function showSuccess(message) {
+            alert(message);
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？未保存的更改将丢失。')) {
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.href = 'index.html?logout=true';
+            }
+        }
+
+        // 删除文章 - 去除成功提示
+        async function deleteArticle(filename) {
+            if (!confirm('确定要删除这篇文章吗？此操作不可撤销。')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/delete_article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        filename: filename
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    loadUserArticles();
+                    
+                    // 如果删除的是当前文章，清空画布
+                    if (currentArticle === filename) {
+                        currentArticle = null;
+                        const canvas = document.getElementById('canvas');
+                        canvas.innerHTML = '<div class="empty-state" id="emptyState"><h3>开始创作您的文章</h3><p>点击工具栏按钮添加文本、图片或其他元素</p></div>';
+                    }
+                } else {
+                    showError('删除文章失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('删除文章失败:', error);
+                showError('网络错误，无法删除文章');
+            }
+        }
+
+        // 重命名文章
+        async function renameArticle(filename) {
+            const currentName = filename.replace('.html', '');
+            const newName = await showCustomPrompt('请输入新的文章名称:', currentName);
+            
+            if (!newName || newName === currentName) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/rename_article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        old_filename: filename,
+                        new_name: newName
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    loadUserArticles();
+                    
+                    // 如果重命名的是当前文章，更新当前文章名
+                    if (currentArticle === filename) {
+                        currentArticle = data.new_filename;
+                    }
+                } else {
+                    showError('重命名文章失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('重命名文章失败:', error);
+                showError('网络错误，无法重命名文章');
+            }
+        }
+
+        // 显示素材库
+        async function showAssetLibrary(assetType) {
+            console.log('显示素材库:', assetType);
+            
+            try {
+                const response = await fetch('/api/get_shared_assets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ type: assetType })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    const modal = document.getElementById('assetModal');
+                    const modalTitle = document.getElementById('modalTitle');
+                    const modalContent = document.getElementById('modalContent');
+                    
+                    modalTitle.textContent = getAssetTypeTitle(assetType);
+                    
+                    if (data.assets.length === 0) {
+                        modalContent.innerHTML = '<div class="empty-state"><p>暂无素材</p></div>';
+                    } else {
+                        // 🔧 修复1: 直接使用generateAssetGrid生成预览图网格
+                        modalContent.innerHTML = generateAssetGrid(data.assets, assetType);
+                    }
+                    
+                    modal.style.display = 'block';
+                    console.log('素材库已打开，共', data.assets.length, '个素材');
+                } else {
+                    console.error('素材库加载失败:', data.message);
+                    showError('加载素材库失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('加载素材库失败:', error);
+                showError('网络错误，无法加载素材库');
+            }
+        }
+
+        // 获取素材类型标题
+        function getAssetTypeTitle(assetType) {
+            const titles = {
+                'backgrounds': '背景图片库',
+                'icons': '图标库',
+                'fonts': '字体库'
+            };
+            return titles[assetType] || '素材库';
+        }
+
+        // 使用素材
+        function useAsset(assetType, assetName) {
+            if (assetType === 'fonts') {
+                // 应用字体到选中元素
+                if (selectedElement) {
+                    // 根据字体文件名推测字体family
+                    const fontFamily = getFontFamilyFromFilename(assetName);
+                    selectedElement.style.fontFamily = fontFamily;
+                    showSuccess(`已应用字体: ${fontFamily}`);
+                } else {
+                    alert('请先选择一个文本元素');
+                }
+            } else {
+                // 其他类型的素材处理
+                const assetPath = `/workplace/share/${assetType}/${assetName}`;
+                insertImageElement(assetPath);
+            }
+            
+            closeModal('assetModal');
+        }
+
+        // 从文件名获取字体家族
+        function getFontFamilyFromFilename(filename) {
+            // 简单的字体文件名映射
+            const fontMap = {
+                'liberation-sans': 'Liberation Sans',
+                'liberation-serif': 'Liberation Serif',
+                'liberation-mono': 'Liberation Mono',
+                'noto-sans': 'Noto Sans CJK SC',
+                'noto-serif': 'Noto Serif CJK SC'
+            };
+            
+            for (const [key, value] of Object.entries(fontMap)) {
+                if (filename.toLowerCase().includes(key)) {
+                    return value;
+                }
+            }
+            
+            // 默认返回文件名（去掉扩展名）
+            return filename.replace(/\.[^/.]+$/, "");
+        }
+
+        // 应用模板
+        function applyTemplate(templateType) {
+            if (!confirm('应用模板将替换当前内容，确定继续吗？')) {
+                return;
+            }
+
+            const templates = {
+                'article': getArticleTemplate(),
+                'blog': getBlogTemplate(),
+                'news': getNewsTemplate()
+            };
+
+            const template = templates[templateType];
+            if (template) {
+                loadContentToCanvas(template);
+                showSuccess(`已应用${templateType}模板`);
+            }
+        }
+
+        // 文章模板
+        function getArticleTemplate() {
+            return `
+                <div class="editable-element" contenteditable="true" style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="font-size: 32px; color: #2c3e50; margin-bottom: 10px;">文章标题</h1>
+                    <p style="color: #7f8c8d; font-size: 14px;">作者：您的姓名 | 发布时间：${new Date().toLocaleDateString()}</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 20px;">
+                    <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 5px;">引言</h2>
+                    <p style="line-height: 1.6; text-indent: 2em;">在这里写下您的文章引言，简要介绍文章的主要内容和观点。</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 20px;">
+                    <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 5px;">正文内容</h2>
+                    <p style="line-height: 1.6; text-indent: 2em;">这里是文章的主要内容部分。您可以详细阐述您的观点，提供论据和例证。</p>
+                    <p style="line-height: 1.6; text-indent: 2em;">可以添加多个段落来组织您的内容结构。</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true">
+                    <h2 style="color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 5px;">结论</h2>
+                    <p style="line-height: 1.6; text-indent: 2em;">在这里总结您的文章要点，给读者留下深刻印象。</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 博客模板
+        function getBlogTemplate() {
+            return `
+                <div class="editable-element" contenteditable="true" style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 10px;">
+                    <h1 style="font-size: 36px; margin-bottom: 10px;">博客标题</h1>
+                    <p style="font-size: 16px; opacity: 0.9;">个人博客 | ${new Date().toLocaleDateString()}</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 20px;">
+                    <p style="font-size: 18px; line-height: 1.8; color: #555; text-indent: 2em;">欢迎来到我的博客！在这里分享我的想法、经验和生活感悟。</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 20px; background: #f8f9fa; padding: 20px; border-left: 4px solid #3498db;">
+                    <h3 style="color: #2c3e50; margin-bottom: 10px;">💡 今日感想</h3>
+                    <p style="line-height: 1.6; margin: 0;">在这里记录您今天的想法和感悟...</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true">
+                    <h3 style="color: #2c3e50; margin-bottom: 15px;">📝 正文内容</h3>
+                    <p style="line-height: 1.6; text-indent: 2em;">开始写下您想要分享的内容...</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 新闻模板
+        function getNewsTemplate() {
+            return `
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 30px;">
+                    <div style="border-bottom: 3px solid #e74c3c; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h1 style="font-size: 28px; color: #2c3e50; margin-bottom: 10px; line-height: 1.2;">新闻标题：重要事件报道</h1>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #7f8c8d;">
+                            <span>📍 地点：北京</span>
+                            <span>🕒 时间：${new Date().toLocaleString()}</span>
+                            <span>👤 记者：您的姓名</span>
+                        </div>
+                    </div>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 20px; background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px;">
+                    <h3 style="color: #856404; margin-bottom: 10px;">📢 新闻摘要</h3>
+                    <p style="margin: 0; font-weight: bold; line-height: 1.4;">在这里写下新闻的核心要点，简洁明了地概括主要信息。</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="margin-bottom: 20px;">
+                    <h3 style="color: #2c3e50; margin-bottom: 15px;">📰 详细报道</h3>
+                    <p style="line-height: 1.6; text-indent: 2em;">详细描述事件的经过、背景和相关信息。遵循新闻写作的5W1H原则：谁(Who)、什么(What)、何时(When)、何地(Where)、为什么(Why)、如何(How)。</p>
+                    <p style="line-height: 1.6; text-indent: 2em;">继续添加更多段落来完善报道内容。</p>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+                <div class="editable-element" contenteditable="true" style="background: #e8f5e8; border-left: 4px solid #27ae60; padding: 15px;">
+                    <h3 style="color: #27ae60; margin-bottom: 10px;">💬 专家观点</h3>
+                    <p style="line-height: 1.6; margin: 0; font-style: italic;">"在这里引用专家的观点和评论..."</p>
+                    <div style="text-align: right; margin-top: 10px; font-size: 14px; color: #7f8c8d;">— 专家姓名，职务</div>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 导出文章 - 添加外边框样式
+        function exportArticle() {
+            if (!currentArticle) {
+                alert('请先选择一篇文章');
+                return;
+            }
+            
+            const content = getCanvasContent();
+            const exportHTML = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${currentArticle.replace('.html', '')}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        .article-container {
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            min-height: 600px;
+        }
+        .image-element {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="article-container">
+        ${content}
+    </div>
+</body>
+</html>`;
+            
+            // 创建下载链接
+            const blob = new Blob([exportHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentArticle;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showSuccess('文章导出成功');
+        }
+
+        // 🔧 修复3: 撤销和重做功能 - 完全重新实现
+        function undo() {
+            console.log('撤销操作，当前撤销栈大小:', undoStack.length, '重做栈大小:', redoStack.length);
+            
+            if (undoStack.length > 1) {
+                // 保存当前状态到重做栈
+                const currentState = getCanvasContent();
+                redoStack.push(currentState);
+                
+                // 移除最后一个状态（当前状态）
+                undoStack.pop();
+                
+                // 获取上一个状态
+                const previousState = undoStack[undoStack.length - 1];
+                
+                // 恢复上一个状态
+                loadContentToCanvas(previousState);
+                
+                console.log('撤销完成，撤销栈大小:', undoStack.length, '重做栈大小:', redoStack.length);
+                // 🔧 修复2: 移除成功提示
+                // showSuccess('撤销操作完成');
+            } else {
+                console.log('没有可撤销的操作');
+                alert('没有可撤销的操作');
+            }
+        }
+
+        function redo() {
+            console.log('重做操作，当前重做栈大小:', redoStack.length, '撤销栈大小:', undoStack.length);
+            
+            if (redoStack.length > 0) {
+                // 保存当前状态到撤销栈
+                const currentState = getCanvasContent();
+                undoStack.push(currentState);
+                
+                // 获取下一个状态
+                const nextState = redoStack.pop();
+                
+                // 恢复下一个状态
+                loadContentToCanvas(nextState);
+                
+                console.log('重做完成，撤销栈大小:', undoStack.length, '重做栈大小:', redoStack.length);
+                // 🔧 修复2: 移除成功提示
+                // showSuccess('重做操作完成');
+            } else {
+                console.log('没有可重做的操作');
+                alert('没有可重做的操作');
+            }
+        }
+
+        // 保存状态到撤销栈
+        function saveStateToUndoStack() {
+            const currentState = getCanvasContent();
+            
+            // 避免保存相同的状态
+            if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentState) {
+                undoStack.push(currentState);
+                
+                // 限制撤销栈大小，防止内存溢出
+                if (undoStack.length > 50) {
+                    undoStack.shift();
+                }
+                
+                // 新的操作会清空重做栈
+                redoStack = [];
+                
+                console.log('状态已保存到撤销栈，栈大小:', undoStack.length);
+            }
+        }
+
+        // 监听画布内容变化 - 改进实现
+        function setupUndoRedoListeners() {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+            
+            let timeout;
+            let lastSavedContent = getCanvasContent();
+            
+            // 监听所有内容变化
+            const handleContentChange = function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    const currentContent = getCanvasContent();
+                    if (currentContent !== lastSavedContent) {
+                        saveStateToUndoStack();
+                        lastSavedContent = currentContent;
+                    }
+                }, 1500); // 1.5秒后保存状态
+            };
+            
+            // 绑定多种事件
+            canvas.addEventListener('input', handleContentChange);
+            canvas.addEventListener('DOMSubtreeModified', handleContentChange);
+            
+            // 使用MutationObserver监听DOM变化
+            if (window.MutationObserver) {
+                const observer = new MutationObserver(handleContentChange);
+                observer.observe(canvas, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    characterData: true
+                });
+            }
+        }
+
+        debugLog('HTML文章编辑器初始化完成');
+        
+        // 📝 我的图片功能
+        
+        // 显示我的图片
+        function showMyPictures() {
+            console.log('显示我的图片');
+            
+            const modal = document.getElementById('myPicturesModal');
+            const content = document.getElementById('myPicturesContent');
+            
+            // 显示模态框
+            modal.style.display = 'block';
+            
+            // 加载用户图片
+            loadMyPictures();
+        }
+
+        // 📊 访客统计功能
+        
+        // 加载访客统计
+        async function loadVisitorStats() {
+            try {
+                const response = await fetch('/api/get_visitor_stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayVisitorStats(data.stats);
+                } else {
+                    console.error('加载访客统计失败:', data.message);
+                    displayVisitorStatsError('加载失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('访客统计网络错误:', error);
+                displayVisitorStatsError('网络错误，无法加载访客统计');
+            }
+        }
+
+        // 显示访客统计
+        function displayVisitorStats(stats) {
+            const content = document.getElementById('visitorStatsContent');
+            
+            if (!stats || stats.length === 0) {
+                content.innerHTML = '<div class="no-visitors">📊 暂无访客数据<br><small>当其他用户通过别名访问您的文章时，这里会显示统计信息</small></div>';
+                return;
+            }
+
+            let html = '<ul class="visitor-stats-list">';
+            
+            // 计算总访问量
+            const totalViews = stats.reduce((sum, stat) => sum + stat.viewtime, 0);
+            
+            // 添加总览
+            html += `
+                <li class="visitor-stat-item" style="border-left-color: #e74c3c; background: #fff5f5;">
+                    <span class="visitor-identity">📊 总访问量</span>
+                    <span class="visitor-count" style="background: #e74c3c;">${totalViews}</span>
+                </li>
+            `;
+            
+            // 显示各类访客统计
+            stats.forEach((stat, index) => {
+                const percentage = ((stat.viewtime / totalViews) * 100).toFixed(1);
+                const colors = ['#3498db', '#27ae60', '#f39c12', '#9b59b6', '#e67e22'];
+                const color = colors[index % colors.length];
+                
+                html += `
+                    <li class="visitor-stat-item" style="border-left-color: ${color};">
+                        <span class="visitor-identity">${getVisitorTypeIcon(stat.identity)} ${stat.identity}</span>
+                        <span class="visitor-count" style="background: ${color};" title="占比 ${percentage}%">${stat.viewtime}</span>
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            
+            // 添加使用说明
+            html += `
+                <div style="margin-top: 15px; padding: 10px; background: #e8f4f8; border-radius: 4px; font-size: 12px; color: #2c3e50;">
+                    <strong>💡 使用说明：</strong><br>
+                    • 访客通过 <code>http://localhost:5000/别名&user=类型</code> 访问您的文章<br>
+                    • 例如：<code>http://localhost:5000/WHU_PAGE&user=student</code><br>
+                    • 系统会自动记录不同类型访客的访问次数
+                </div>
+            `;
+            
+            content.innerHTML = html;
+            console.log('✅ 访客统计显示完成，共', stats.length, '种访客类型');
+        }
+
+        // 显示访客统计错误
+        function displayVisitorStatsError(message) {
+            const content = document.getElementById('visitorStatsContent');
+            content.innerHTML = `<div class="no-visitors">❌ ${message}</div>`;
+        }
+
+        // 获取访客类型图标
+        function getVisitorTypeIcon(identity) {
+            const iconMap = {
+                'student': '🎓',
+                'teacher': '👨‍🏫',
+                'tourist': '🧳',
+                'admin': '👑',
+                'visitor': '👤',
+                'guest': '🌟',
+                'member': '🔑',
+                'vip': '💎'
+            };
+            
+            return iconMap[identity.toLowerCase()] || '👤';
+        }
+
+        // 刷新访客统计
+        function refreshVisitorStats() {
+            console.log('🔄 刷新访客统计');
+            const content = document.getElementById('visitorStatsContent');
+            content.innerHTML = '<div class="loading">刷新统计中...</div>';
+            
+            setTimeout(() => {
+                loadVisitorStats();
+            }, 500); // 短暂延迟以显示加载状态
+        }
+
+        // 加载用户图片列表 - 修复路径问题
+        async function loadMyPictures() {
+            try {
+                const response = await fetch('/api/get_my_pictures', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayMyPictures(data.pictures);
+                } else {
+                    document.getElementById('myPicturesContent').innerHTML = 
+                        '<div class="empty-state"><p>加载失败: ' + data.message + '</p></div>';
+                }
+            } catch (error) {
+                console.error('加载我的图片失败:', error);
+                document.getElementById('myPicturesContent').innerHTML = 
+                    '<div class="empty-state"><p>网络错误，无法加载图片</p></div>';
+            }
+        }
+
+        // 显示用户图片列表 - 修复图片路径和显示问题
+        function displayMyPictures(pictures) {
+            const content = document.getElementById('myPicturesContent');
+            
+            if (pictures.length === 0) {
+                content.innerHTML = '<div class="empty-state"><p>还没有导入图片<br><small>点击"导入图片"按钮添加您的图片</small></p></div>';
+                return;
+            }
+
+            let html = '<div class="assets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; padding: 10px;">';
+            
+            pictures.forEach(picture => {
+                // 🔧 修复图片路径 - 使用正确的API端点
+                const picturePath = `/api/get_user_picture/${currentUser}/${picture.name}`;
+                console.log('🖼️ 加载用户图片:', picturePath);
+                
+                html += `
+                    <div class="asset-item" onclick="insertImageElement('${picturePath}'); closeModal('myPicturesModal');" 
+                         title="${picture.name}" style="
+                        cursor: pointer; 
+                        border: 2px solid #e1e5e9; 
+                        border-radius: 10px; 
+                        padding: 8px; 
+                        transition: all 0.3s ease;
+                        background: white;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        overflow: hidden;
+                        width: 120px;
+                        height: 120px;
+                        position: relative;
+                    " onmouseover="this.style.borderColor='#3498db'; this.style.transform='scale(1.05)'" 
+                       onmouseout="this.style.borderColor='#e1e5e9'; this.style.transform='scale(1)'">
+                        <div style="
+                            width: 100%; 
+                            height: 100%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center;
+                            overflow: hidden;
+                            border-radius: 6px;
+                            background: #f8f9fa;
+                        ">
+                            <img src="${picturePath}" alt="${picture.name}" style="
+                                max-width: 100%; 
+                                max-height: 100%; 
+                                object-fit: contain; 
+                                display: block;
+                            " onerror="console.error('图片加载失败:', this.src); this.style.display='none'; this.nextSibling.style.display='flex';" 
+                               onload="console.log('我的图片加载成功:', this.src)">
+                            <div style="
+                                display: none;
+                                align-items: center;
+                                justify-content: center;
+                                width: 100%;
+                                height: 100%;
+                                font-size: 36px;
+                                color: #7f8c8d;
+                            ">📷</div>
+                        </div>
+                        <button onclick="event.stopPropagation(); deleteMyPicture('${picture.name}')" 
+                                style="position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; 
+                                       background: rgba(231, 76, 60, 0.8); color: white; border: none; 
+                                       border-radius: 50%; font-size: 12px; cursor: pointer; display: none;"
+                                class="delete-btn">×</button>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+            
+            // 添加悬停时显示删除按钮的效果
+            setTimeout(() => {
+                document.querySelectorAll('.asset-item').forEach(item => {
+                    const deleteBtn = item.querySelector('.delete-btn');
+                    if (deleteBtn) {
+                        item.addEventListener('mouseenter', () => {
+                            deleteBtn.style.display = 'block';
+                        });
+                        item.addEventListener('mouseleave', () => {
+                            deleteBtn.style.display = 'none';
+                        });
+                    }
+                });
+            }, 100);
+        }
+
+        // 处理图片上传
+        async function handleMyImageUpload() {
+            const files = document.getElementById('uploadImageFile').files;
+            if (!files || files.length === 0) return;
+            
+            const formData = new FormData();
+            formData.append('username', currentUser);
+            
+            // 添加所有选中的文件
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // 验证文件类型
+                if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+                    alert(`文件 "${file.name}" 不是支持的格式，请选择 PNG 或 JPG 格式的图片。`);
+                    continue;
+                }
+                
+                // 验证文件大小（5MB限制）
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`文件 "${file.name}" 太大，请选择小于 5MB 的图片。`);
+                    continue;
+                }
+                
+                formData.append('pictures', file);
+            }
+            
+            try {
+                // 显示上传中状态
+                document.getElementById('myPicturesContent').innerHTML = '<div class="loading">正在上传图片...</div>';
+                
+                const response = await fetch('/api/upload_my_pictures', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log(`✅ 成功上传 ${data.uploaded_count} 张图片`);
+                    // 重新加载图片列表
+                    loadMyPictures();
+                    
+                    // 清空文件选择
+                    document.getElementById('uploadImageFile').value = '';
+                    
+                    // 显示成功消息
+                    if (data.uploaded_count > 0) {
+                        showSuccess(`成功上传 ${data.uploaded_count} 张图片`);
+                    }
+                    if (data.skipped_count > 0) {
+                        alert(`跳过 ${data.skipped_count} 张重复的图片`);
+                    }
+                } else {
+                    showError('上传失败: ' + data.message);
+                    loadMyPictures(); // 重新加载以恢复界面
+                }
+            } catch (error) {
+                console.error('上传图片失败:', error);
+                showError('网络错误，上传失败');
+                loadMyPictures(); // 重新加载以恢复界面
+            }
+        }
+
+        // 删除我的图片
+        async function deleteMyPicture(filename) {
+            if (!confirm(`确定要删除图片 "${filename}" 吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/delete_my_picture', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        filename: filename
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log(`🗑️ 成功删除图片: ${filename}`);
+                    // 重新加载图片列表
+                    loadMyPictures();
+                } else {
+                    showError('删除失败: ' + data.message);
+                }
+            } catch (error) {
+                console.error('删除图片失败:', error);
+                showError('网络错误，删除失败');
+            }
+        }
+
+        // 🔗 文章链接功能
+        
+        // 插入链接
+        function insertLink() {
+            const modal = document.getElementById('linkModal');
+            modal.style.display = 'block';
+            
+            // 加载用户的文章列表
+            loadArticleListForLink();
+            
+            // 检查是否选中了图片元素
+            if (selectedElement && selectedElement.querySelector('.image-element')) {
+                document.getElementById('linkType').value = 'image';
+                document.getElementById('linkText').value = '图片链接';
+            } else {
+                document.getElementById('linkType').value = 'text';
+                document.getElementById('linkText').value = '点击这里';
+            }
+        }
+        
+        // 加载文章列表用于链接选择
+        async function loadArticleListForLink() {
+            try {
+                const response = await fetch('/api/user_articles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayArticleListForLink(data.articles);
+                } else {
+                    document.getElementById('linkTargetList').innerHTML = 
+                        '<div class="empty-state"><p>加载失败: ' + data.message + '</p></div>';
+                }
+            } catch (error) {
+                console.error('加载文章列表失败:', error);
+                document.getElementById('linkTargetList').innerHTML = 
+                    '<div class="empty-state"><p>网络错误，无法加载文章列表</p></div>';
+            }
+        }
+        
+        // 显示用于链接选择的文章列表
+        function displayArticleListForLink(articles) {
+            const listContainer = document.getElementById('linkTargetList');
+            
+            if (articles.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><p>还没有其他文章可以链接</p></div>';
+                return;
+            }
+            
+            // 排除当前正在编辑的文章
+            const availableArticles = articles.filter(article => article.filename !== currentArticle);
+            
+            if (availableArticles.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state"><p>没有其他文章可以链接</p></div>';
+                return;
+            }
+            
+            let html = '<div style="max-height: 200px; overflow-y: auto;">';
+            availableArticles.forEach(article => {
+                html += `
+                    <div class="article-item" onclick="selectLinkTarget('${article.filename}', '${article.name}')" 
+                         style="cursor: pointer; margin: 5px 0; padding: 10px; border: 2px solid transparent; border-radius: 4px;"
+                         onmouseover="this.style.borderColor='#3498db'" 
+                         onmouseout="this.style.borderColor='transparent'">
+                        <div class="article-name" style="font-weight: bold; color: #2c3e50;">${article.name}</div>
+                        <div style="font-size: 12px; color: #7f8c8d;">文件: ${article.filename}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            listContainer.innerHTML = html;
+        }
+        
+        // 选择链接目标
+        function selectLinkTarget(filename, name) {
+            // 清除之前的选中状态
+            document.querySelectorAll('#linkTargetList .article-item').forEach(item => {
+                item.style.backgroundColor = '';
+                item.style.borderColor = 'transparent';
+            });
+            
+            // 高亮选中的文章
+            event.target.closest('.article-item').style.backgroundColor = '#e8f4f8';
+            event.target.closest('.article-item').style.borderColor = '#3498db';
+            
+            // 保存选中的目标
+            window.selectedLinkTarget = {
+                filename: filename,
+                name: name
+            };
+            
+            console.log('选中链接目标:', filename, name);
+        }
+        
+        // 插入链接元素
+        function insertLinkElement() {
+            if (!window.selectedLinkTarget) {
+                alert('请先选择一个目标文章');
+                return;
+            }
+            
+            const linkText = document.getElementById('linkText').value.trim();
+            const linkType = document.getElementById('linkType').value;
+            
+            if (!linkText) {
+                alert('请输入链接文本');
+                return;
+            }
+            
+            // 先保存当前状态到撤销栈
+            saveStateToUndoStack();
+            
+            const canvas = document.getElementById('canvas');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (emptyState) emptyState.style.display = 'none';
+            
+            if (linkType === 'image' && selectedElement && selectedElement.querySelector('.image-element')) {
+                // 为选中的图片添加链接
+                const img = selectedElement.querySelector('.image-element');
+                const linkUrl = `/link/${currentUser}/${window.selectedLinkTarget.filename}?from=${currentArticle}`;
+                
+                // 创建链接包装
+                const linkWrapper = document.createElement('a');
+                linkWrapper.href = linkUrl;
+                linkWrapper.target = '_blank';
+                linkWrapper.style.display = 'block';
+                linkWrapper.style.textDecoration = 'none';
+                linkWrapper.title = `点击查看：${window.selectedLinkTarget.name}`;
+                
+                // 添加链接样式
+                img.style.cursor = 'pointer';
+                img.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+                img.addEventListener('mouseover', function() {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.boxShadow = '0 8px 16px rgba(52, 152, 219, 0.3)';
+                });
+                img.addEventListener('mouseout', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                });
+                
+                // 包装图片
+                img.parentNode.insertBefore(linkWrapper, img);
+                linkWrapper.appendChild(img);
+                
+                // 添加链接指示器
+                const linkIndicator = document.createElement('div');
+                linkIndicator.innerHTML = `🔗 链接到：${window.selectedLinkTarget.name}`;
+                linkIndicator.style.cssText = `
+                    background: #e8f4f8;
+                    color: #2c3e50;
+                    padding: 5px 10px;
+                    font-size: 12px;
+                    text-align: center;
+                    border-radius: 4px;
+                    margin-top: 5px;
+                    border: 1px solid #3498db;
+                `;
+                selectedElement.appendChild(linkIndicator);
+                
+            } else {
+                // 插入文本链接
+                const linkContainer = document.createElement('div');
+                linkContainer.className = 'editable-element';
+                
+                const linkUrl = `/link/${currentUser}/${window.selectedLinkTarget.filename}?from=${currentArticle}`;
+                
+                linkContainer.innerHTML = `
+                    <a href="${linkUrl}" target="_blank" style="
+                        color: #3498db;
+                        text-decoration: none;
+                        font-weight: bold;
+                        padding: 8px 16px;
+                        border: 2px solid #3498db;
+                        border-radius: 6px;
+                        display: inline-block;
+                        transition: all 0.3s ease;
+                        background: linear-gradient(45deg, transparent 0%, rgba(52, 152, 219, 0.1) 100%);
+                    " onmouseover="
+                        this.style.backgroundColor='#3498db';
+                        this.style.color='white';
+                        this.style.transform='translateY(-2px)';
+                        this.style.boxShadow='0 4px 8px rgba(52, 152, 219, 0.3)';
+                    " onmouseout="
+                        this.style.backgroundColor='transparent';
+                        this.style.color='#3498db';
+                        this.style.transform='translateY(0)';
+                        this.style.boxShadow='none';
+                    " title="点击查看：${window.selectedLinkTarget.name}">
+                        🔗 ${linkText}
+                    </a>
+                    <div style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">
+                        链接到：${window.selectedLinkTarget.name}
+                    </div>
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="deleteElement(this)" title="删除">×</button>
+                        <button class="control-btn" onclick="moveUp(this)" title="上移">↑</button>
+                        <button class="control-btn" onclick="moveDown(this)" title="下移">↓</button>
+                    </div>
+                `;
+                
+                canvas.appendChild(linkContainer);
+                linkContainer.addEventListener('click', selectElement);
+                selectElement({ target: linkContainer });
+            }
+            
+            console.log(`✅ 已插入${linkType === 'image' ? '图片' : '文本'}链接到：${window.selectedLinkTarget.name}`);
+            
+            // 关闭模态框并清理
+            closeModal('linkModal');
+            window.selectedLinkTarget = null;
+        }
+
+        // 🔑 修改密码功能
+
+        // 显示修改密码模态框
+        function showChangePasswordModal() {
+            console.log('显示修改密码模态框');
+            const modal = document.getElementById('changePasswordModal');
+            modal.style.display = 'block';
+            
+            // 清空表单
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('changePasswordVerificationCode').value = '';
+            document.getElementById('changePasswordErrorMessage').style.display = 'none';
+            document.getElementById('changePasswordSuccessMessage').style.display = 'none';
+            document.getElementById('changePasswordCountdown').textContent = '';
+            
+            const sendCodeBtn = document.getElementById('sendChangePasswordCodeBtn');
+            sendCodeBtn.disabled = false;
+            sendCodeBtn.textContent = '发送验证码';
+        }
+
+        // 发送修改密码验证码
+        async function sendChangePasswordCode() {
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            
+            if (!currentPassword) {
+                showChangePasswordError('请输入当前密码');
+                return;
+            }
+            
+            try {
+                // 验证当前密码
+                const encryptedCurrentPassword = window.CryptoUtils.convertToEncryptedHex(currentPassword);
+                const verifyResponse = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: currentUser,
+                        password: encryptedCurrentPassword
+                    })
+                });
+                
+                const verifyResult = await verifyResponse.json();
+                if (!verifyResult.success) {
+                    showChangePasswordError('当前密码错误');
+                    return;
+                }
+                
+                // 显示人机验证
+                showChangePasswordCaptcha();
+                
+            } catch (error) {
+                console.error('验证当前密码失败:', error);
+                showChangePasswordError('网络错误，请重试');
+            }
+        }
+
+        // 显示修改密码的人机验证
+        function showChangePasswordCaptcha() {
+            const modal = document.getElementById('changePasswordCaptchaModal');
+            modal.style.display = 'block';
+            
+            const checkbox = document.getElementById('changePasswordRobotCheck');
+            checkbox.checked = false;
+            
+            const confirmBtn = document.getElementById('changePasswordCaptchaConfirm');
+            confirmBtn.disabled = true;
+        }
+
+        // 处理修改密码的人机验证
+        function handleChangePasswordCaptcha() {
+            const checkbox = document.getElementById('changePasswordRobotCheck');
+            const confirmBtn = document.getElementById('changePasswordCaptchaConfirm');
+            confirmBtn.disabled = !checkbox.checked;
+        }
+
+        // 确认修改密码的人机验证
+        async function confirmChangePasswordCaptcha() {
+            closeModal('changePasswordCaptchaModal');
+            
+            try {
+                // 发送验证码到用户邮箱
+                const response = await fetch('/api/send_change_password_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showChangePasswordSuccess('验证码已发送到您的邮箱，请查收');
+                    startChangePasswordCountdown();
+                } else {
+                    showChangePasswordError('发送验证码失败: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('发送验证码失败:', error);
+                showChangePasswordError('网络错误，请重试');
+            }
+        }
+
+        // 开始倒计时
+        function startChangePasswordCountdown() {
+            const sendCodeBtn = document.getElementById('sendChangePasswordCodeBtn');
+            const countdownDiv = document.getElementById('changePasswordCountdown');
+            
+            sendCodeBtn.disabled = true;
+            let countdown = 60;
+            
+            const interval = setInterval(() => {
+                countdownDiv.textContent = `请等待 ${countdown} 秒后重试`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(interval);
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.textContent = '发送验证码';
+                    countdownDiv.textContent = '';
+                }
+            }, 1000);
+        }
+
+        // 进入下一步：设置新密码
+        async function proceedToNewPassword() {
+            const verificationCode = document.getElementById('changePasswordVerificationCode').value.trim();
+            
+            if (!verificationCode) {
+                showChangePasswordError('请输入验证码');
+                return;
+            }
+            
+            try {
+                // 验证验证码
+                const response = await fetch('/api/verify_change_password_code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        code: verificationCode
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    closeModal('changePasswordModal');
+                    showNewPasswordModal();
+                } else {
+                    showChangePasswordError('验证码错误: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('验证码验证失败:', error);
+                showChangePasswordError('网络错误，请重试');
+            }
+        }
+
+        // 显示新密码设置模态框
+        function showNewPasswordModal() {
+            const modal = document.getElementById('newPasswordModal');
+            modal.style.display = 'block';
+            
+            // 清空表单
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            document.getElementById('newPasswordStrength').textContent = '';
+            document.getElementById('newPasswordErrorMessage').style.display = 'none';
+            document.getElementById('newPasswordSuccessMessage').style.display = 'none';
+        }
+
+        // 检查新密码强度
+        function checkNewPasswordStrength() {
+            const password = document.getElementById('newPassword').value;
+            const strengthElement = document.getElementById('newPasswordStrength');
+            
+            if (!password) {
+                strengthElement.textContent = '';
+                return;
+            }
+            
+            let score = 0;
+            const checks = {
+                hasNumber: /\d/.test(password),
+                hasLower: /[a-z]/.test(password),
+                hasUpper: /[A-Z]/.test(password),
+                hasUnderscore: /_/.test(password)
+            };
+            
+            score = Object.values(checks).filter(Boolean).length;
+            
+            let strengthText = '';
+            let strengthClass = '';
+            
+            switch (score) {
+                case 1:
+                    strengthText = '密码强度：弱';
+                    strengthClass = 'strength-weak';
+                    break;
+                case 2:
+                    strengthText = '密码强度：中';
+                    strengthClass = 'strength-medium';
+                    break;
+                case 3:
+                    strengthText = '密码强度：强';
+                    strengthClass = 'strength-strong';
+                    break;
+                case 4:
+                    strengthText = '密码强度：极强';
+                    strengthClass = 'strength-very-strong';
+                    break;
+                default:
+                    strengthText = '密码强度：弱';
+                    strengthClass = 'strength-weak';
+            }
+            
+            strengthElement.textContent = strengthText;
+            strengthElement.className = `password-strength ${strengthClass}`;
+        }
+
+        // 更新用户密码
+        async function updateUserPassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmNewPassword').value;
+            
+            // 验证密码
+            if (newPassword.length < 6 || newPassword.length > 16) {
+                showNewPasswordError('密码长度必须在6-16位之间');
+                return;
+            }
+            
+            const validChars = /^[a-zA-Z0-9_]+$/;
+            if (!validChars.test(newPassword)) {
+                showNewPasswordError('密码只能包含数字、大小写字母和下划线');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNewPasswordError('两次输入的密码不一致');
+                return;
+            }
+            
+            try {
+                // 加密新密码
+                const encryptedPassword = window.CryptoUtils.convertToEncryptedHex(newPassword);
+                
+                // 更新密码
+                const response = await fetch('/api/change_user_password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        password: encryptedPassword
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    console.log('✅ 密码修改成功，正在跳转到登录页面...');
+                    // 直接执行重新登录，不显示确认弹窗
+                    logout();
+                } else {
+                    showNewPasswordError('密码修改失败: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('密码修改失败:', error);
+                showNewPasswordError('网络错误，请重试');
+            }
+        }
+
+        // 显示修改密码错误信息
+        function showChangePasswordError(message) {
+            const errorElement = document.getElementById('changePasswordErrorMessage');
+            errorElement.innerHTML = message;
+            errorElement.style.display = 'block';
+            document.getElementById('changePasswordSuccessMessage').style.display = 'none';
+        }
+
+        // 显示修改密码成功信息
+        function showChangePasswordSuccess(message) {
+            const successElement = document.getElementById('changePasswordSuccessMessage');
+            successElement.innerHTML = message;
+            successElement.style.display = 'block';
+            document.getElementById('changePasswordErrorMessage').style.display = 'none';
+        }
+
+        // 显示新密码错误信息
+        function showNewPasswordError(message) {
+            const errorElement = document.getElementById('newPasswordErrorMessage');
+            errorElement.innerHTML = message;
+            errorElement.style.display = 'block';
+            document.getElementById('newPasswordSuccessMessage').style.display = 'none';
+        }
+
+        // 🌐 访客通道管理功能
+
+        // 显示访客通道管理模态框
+        function showVisitorAccessModal() {
+            console.log('显示访客通道管理模态框');
+            const modal = document.getElementById('visitorAccessModal');
+            modal.style.display = 'block';
+            
+            // 加载数据
+            loadVisitorLinks();
+            loadArticlesForVisitor();
+            
+            // 清空表单
+            document.getElementById('visitorArticleSelect').value = '';
+            document.getElementById('visitorAlias').value = '';
+            document.getElementById('visitorAccessErrorMessage').style.display = 'none';
+            document.getElementById('visitorAccessSuccessMessage').style.display = 'none';
+        }
+
+        // 加载访客链接列表
+        async function loadVisitorLinks() {
+            try {
+                const response = await fetch('/api/get_visitor_links', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayVisitorLinks(data.links);
+                } else {
+                    document.getElementById('visitorLinksList').innerHTML = 
+                        '<div class="empty-state"><p>加载失败: ' + data.message + '</p></div>';
+                }
+            } catch (error) {
+                console.error('加载访客链接失败:', error);
+                document.getElementById('visitorLinksList').innerHTML = 
+                    '<div class="empty-state"><p>网络错误，无法加载访客链接</p></div>';
+            }
+        }
+
+        // 显示访客链接列表
+        function displayVisitorLinks(links) {
+            const container = document.getElementById('visitorLinksList');
+            
+            if (links.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>还没有访客链接</p></div>';
+                return;
+            }
+            
+            let html = '<div style="max-height: 200px; overflow-y: auto;">';
+            links.forEach(link => {
+                html += `
+                    <div class="article-item" style="margin: 5px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #2c3e50; margin-bottom: 2px;">${link.alias}</div>
+                            <div style="font-size: 12px; color: #7f8c8d;">${link.article_name}</div>
+                        </div>
+                        <div style="flex: 0 0 auto; margin-left: 15px;">
+                            <button class="btn btn-secondary" onclick="removeVisitorLink('${link.alias}')" 
+                                    style="padding: 4px 12px; font-size: 12px; background: #e74c3c; color: white; border: none;" 
+                                    onmouseover="this.style.background='#c0392b'" 
+                                    onmouseout="this.style.background='#e74c3c'">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        // 加载文章列表供访客通道选择
+        async function loadArticlesForVisitor() {
+            try {
+                const response = await fetch('/api/user_articles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    const select = document.getElementById('visitorArticleSelect');
+                    select.innerHTML = '<option value="">请选择文章</option>';
+                    
+                    data.articles.forEach(article => {
+                        const option = document.createElement('option');
+                        option.value = article.filename;
+                        option.textContent = article.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('加载文章列表失败:', error);
+            }
+        }
+
+        // 添加访客链接
+        async function addVisitorLink() {
+            const articleFile = document.getElementById('visitorArticleSelect').value;
+            const alias = document.getElementById('visitorAlias').value.trim();
+            
+            if (!articleFile) {
+                showVisitorAccessError('请选择文章');
+                return;
+            }
+            
+            if (!alias) {
+                showVisitorAccessError('请输入别名');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/add_visitor_link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        article_file: articleFile,
+                        alias: alias
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showVisitorAccessSuccess('访客链接添加成功');
+                    loadVisitorLinks();
+                    
+                    // 清空表单
+                    document.getElementById('visitorArticleSelect').value = '';
+                    document.getElementById('visitorAlias').value = '';
+                } else {
+                    showVisitorAccessError('添加失败: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('添加访客链接失败:', error);
+                showVisitorAccessError('网络错误，请重试');
+            }
+        }
+
+        // 删除访客链接
+        async function removeVisitorLink(alias) {
+            if (!confirm(`确定要删除访客链接 "${alias}" 吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/remove_visitor_link', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        alias: alias
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showVisitorAccessSuccess('访客链接删除成功');
+                    loadVisitorLinks();
+                } else {
+                    showVisitorAccessError('删除失败: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('删除访客链接失败:', error);
+                showVisitorAccessError('网络错误，请重试');
+            }
+        }
+
+        // 显示访客通道错误信息
+        function showVisitorAccessError(message) {
+            const errorElement = document.getElementById('visitorAccessErrorMessage');
+            errorElement.innerHTML = message;
+            errorElement.style.display = 'block';
+            document.getElementById('visitorAccessSuccessMessage').style.display = 'none';
+        }
+
+        // 显示访客通道成功信息
+        function showVisitorAccessSuccess(message) {
+            const successElement = document.getElementById('visitorAccessSuccessMessage');
+            successElement.innerHTML = message;
+            successElement.style.display = 'block';
+            document.getElementById('visitorAccessErrorMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

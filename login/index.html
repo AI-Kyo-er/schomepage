@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schomepage主页生成系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .login-container h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .login-btn, .register-btn, .send-code-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 10px;
+        }
+        .register-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        .send-code-btn {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            font-size: 14px;
+            padding: 8px;
+            margin-bottom: 0;
+        }
+        .login-btn:hover, .register-btn:hover, .send-code-btn:hover {
+            transform: translateY(-2px);
+        }
+        .verification-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .verification-input-group input {
+            flex: 1;
+        }
+        .verification-input-group button {
+            flex: 0 0 auto;
+            width: 100px;
+        }
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+        }
+        .success-message {
+            color: #27ae60;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+        }
+        .close:hover {
+            color: #000;
+        }
+        
+        /* 注册表单样式 */
+        .register-form {
+            text-align: left;
+        }
+        .register-form h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .terms-link {
+            color: #667eea;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .terms-link:hover {
+            color: #5a67d8;
+        }
+        
+        /* 服务条款样式 */
+        .terms-content {
+            line-height: 1.6;
+            color: #555;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .terms-content h4 {
+            color: #333;
+            margin-top: 20px;
+        }
+        
+        /* 服务条款弹窗特殊样式 */
+        #termsModal .modal-content {
+            max-height: 500px;
+            overflow: hidden;
+        }
+        
+        /* 人机验证样式 */
+        .captcha-container {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .captcha-container h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .captcha-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            font-size: 16px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+        .captcha-checkbox input {
+            width: auto;
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+        .captcha-checkbox label {
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        /* 密码设置样式 */
+        .password-setup {
+            text-align: left;
+        }
+        .password-strength {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .strength-weak { color: #e74c3c; }
+        .strength-medium { color: #f39c12; }
+        .strength-strong { color: #27ae60; }
+        .strength-very-strong { color: #2ecc71; }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button-group button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .confirm-password-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .direct-login-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        .button-group button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .countdown {
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>系统登录</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名：</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码：</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-btn">登录</button>
+            <button type="button" class="register-btn" onclick="showRegisterModal()">账号注册</button>
+        </form>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+    </div>
+
+    <!-- 注册弹窗 -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <div class="register-form">
+                <h3>账号注册</h3>
+                <div class="form-group">
+                    <label for="registerEmail">邮箱地址：</label>
+                    <input type="email" id="registerEmail" name="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="verificationCode">验证码：</label>
+                    <div class="verification-input-group">
+                        <input type="text" id="verificationCode" name="verificationCode" maxlength="6" required>
+                        <button type="button" class="send-code-btn" id="sendCodeBtn" onclick="requestVerificationCode()">发送验证码</button>
+                    </div>
+                    <div id="countdown" class="countdown"></div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="agreeTerms" name="agreeTerms">
+                    <label for="agreeTerms">我已阅读并同意 <span class="terms-link" onclick="showTermsModal()">《用户服务条款》</span></label>
+                </div>
+                <button type="button" class="login-btn" onclick="registerUser()">注册</button>
+                <div id="registerErrorMessage" class="error-message"></div>
+                <div id="registerSuccessMessage" class="success-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 服务条款弹窗 -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTermsModal()">&times;</span>
+            <div class="terms-content">
+                <h3>用户服务条款</h3>
+                <h4>1. 服务条款的确认和接受</h4>
+                <p>欢迎使用schomepage软件系统。在您使用本服务前，请仔细阅读本用户服务条款的全部内容。</p>
+                
+                <h4>2. 用户账户</h4>
+                <p>用户需要注册账户才能使用本软件的完整功能。用户应当保证注册信息的真实性、准确性和完整性。</p>
+                
+                <h4>3. 用户行为规范</h4>
+                <p>用户在使用本软件时，应当遵守国家法律法规，不得从事违法违规活动。</p>
+                
+                <h4>4. 隐私保护</h4>
+                <p>我们重视用户隐私保护，会采取合理措施保护用户个人信息安全。</p>
+                
+                <h4>5. 免责声明</h4>
+                <p>本软件按"现状"提供，我们不对软件的适用性、稳定性、安全性等做出任何明示或暗示的保证。</p>
+                
+                <h4>6. 条款修改</h4>
+                <p>我们保留随时修改本服务条款的权利，修改后的条款将在软件内公布。</p>
+                
+                <p style="margin-top: 30px; text-align: center; color: #999;">
+                    最后更新时间：2024年1月1日
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 人机验证弹窗 -->
+    <div id="captchaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCaptchaModal()">&times;</span>
+            <div class="captcha-container">
+                <h3>安全验证</h3>
+                <div class="captcha-checkbox">
+                    <input type="checkbox" id="robotCheck" name="robotCheck">
+                    <label for="robotCheck">点击这里，确保您不是机器人</label>
+                </div>
+                <button type="button" class="login-btn" onclick="proceedWithVerification()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密码设置弹窗 -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="password-setup">
+                <h3>设置密码</h3>
+                <div class="form-group">
+                    <label for="newPassword">设置密码：</label>
+                    <input type="password" id="newPassword" name="newPassword" placeholder="6-16位，包含数字、字母或下划线">
+                    <div id="passwordStrength" class="password-strength"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">重复密码：</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword">
+                </div>
+                <div class="button-group">
+                    <button type="button" class="confirm-password-btn" onclick="updatePassword()">确认密码</button>
+                    <button type="button" class="direct-login-btn" onclick="directLogin()">直接登录</button>
+                </div>
+                <div id="passwordErrorMessage" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="crypto.js"></script>
+    <script src="register.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html> 
