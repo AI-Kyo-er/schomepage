@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>武汉大学 - 自强弘毅 求是拓新</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 5px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .header .motto {
+            font-size: 24px;
+            font-style: italic;
+            opacity: 0.95;
+            letter-spacing: 3px;
+            margin-top: 10px;
+        }
+
+        .header .description {
+            font-size: 16px;
+            margin-top: 20px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 15px 35px;
+            background: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            color: #667eea;
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .card-image {
+            transform: scale(1.1);
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge-article {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .badge-blog {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .badge-news {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .card-description {
+            font-size: 15px;
+            color: #7f8c8d;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #95a5a6;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .card-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-author {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer h3 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .footer p {
+            color: #7f8c8d;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* Section Filters */
+        .section-hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .header .motto {
+                font-size: 18px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                width: 100%;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo">武大</div>
+                </div>
+                <h1>武汉大学</h1>
+                <p class="motto">自强 弘毅 求是 拓新</p>
+                <p class="description">
+                    Wuhan University - 中国著名综合性研究型大学，溯源于1893年创办的自强学堂<br>
+                    国家首批"双一流"建设高校，坐拥珞珈山，环绕东湖水，被誉为"中国最美大学"
+                </p>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="filterCards('all')">📚 全部内容</button>
+            <button class="nav-tab" onclick="filterCards('article')">📄 学术文章</button>
+            <button class="nav-tab" onclick="filterCards('blog')">✍️ 校园博客</button>
+            <button class="nav-tab" onclick="filterCards('news')">📰 新闻资讯</button>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid" id="cardsGrid">
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                <p style="font-size: 18px; color: #667eea;">🔄 加载内容中...</p>
+            </div>
+            
+            <!-- Dynamic cards will be inserted here -->
+            
+            <!-- Fallback static cards (if no published content) -->
+            <div class="card static-card" data-type="article" onclick="window.open('/link/admin/学院简介.html?from=home.html', '_blank')" style="display: none;">
+                <img src="/workplace/share/backgrounds/glasscurtains_light.webp" alt="学术殿堂" class="card-image">
+                <span class="card-badge badge-article">学术文章</span>
+                <div class="card-content">
+                    <h3 class="card-title">武汉大学学院概览</h3>
+                    <p class="card-description">
+                        探索武汉大学各学院的学科特色与学术优势，了解我校在人文、理工、医学等领域的卓越成就和教育理念。
+                    </p>
+                    <div class="card-meta">
+                        <span class="card-date">📅 2025-11-15</span>
+                        <span class="card-author">👤 学术办公室</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Cards -->
+            <div class="card" data-type="news" onclick="window.open('/link/admin/校园导览.html?from=home.html', '_blank')">
+                <img src="/workplace/share/backgrounds/whu.webp" alt="校园导览" class="card-image">
+                <span class="card-badge badge-news">新闻资讯</span>
+                <div class="card-content">
+                    <h3 class="card-title">春季校园开放日即将启动</h3>
+                    <p class="card-description">
+                        武汉大学2025年春季校园开放日将于3月举行，欢迎各界人士参观美丽的珞珈山校园，共赏樱花盛景。
+                    </p>
+                    <div class="card-meta">
+                        <span class="card-date">📅 2025-11-17</span>
+                        <span class="card-author">👤 校办新闻中心</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" data-type="news" onclick="window.open('/link/admin/学生服务.html?from=home.html', '_blank')">
+                <img src="/workplace/share/backgrounds/flight_light.webp" alt="学生服务" class="card-image">
+                <span class="card-badge badge-news">新闻资讯</span>
+                <div class="card-content">
+                    <h3 class="card-title">学生服务中心全面升级</h3>
+                    <p class="card-description">
+                        为更好服务广大学生，学生服务中心完成数字化改造，推出"一站式"在线服务平台，办事更便捷高效。
+                    </p>
+                    <div class="card-meta">
+                        <span class="card-date">📅 2025-11-16</span>
+                        <span class="card-author">👤 学生工作部</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <h3>武汉大学 Wuhan University</h3>
+                <p>
+                    武汉大学是国家教育部直属重点综合性大学，是国家"985工程"和"211工程"重点建设高校，
+                    是首批"双一流"建设高校。武汉大学环绕东湖水，坐拥珞珈山，校园环境优美，风景如画，
+                    被誉为"中国最美的大学"。
+                </p>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        📍 湖北省武汉市武昌区珞珈山路16号
+                    </div>
+                    <div class="contact-item">
+                        📞 027-68752000
+                    </div>
+                    <div class="contact-item">
+                        📧 whu@whu.edu.cn
+                    </div>
+                    <div class="contact-item">
+                        🌐 www.whu.edu.cn
+                    </div>
+                </div>
+                <p style="margin-top: 25px; color: #95a5a6; font-size: 14px;">
+                    © 2025 Wuhan University. All Rights Reserved. | 建校130周年
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Badge styles for different content types
+        const badgeClasses = {
+            'article': 'badge-article',
+            'blog': 'badge-blog',
+            'news': 'badge-news'
+        };
+
+        const badgeLabels = {
+            'article': '学术文章',
+            'blog': '校园博客',
+            'news': '新闻资讯'
+        };
+
+        // Load published content from server
+        async function loadPublishedContent() {
+            try {
+                const response = await fetch('/api/get_all_publications');
+                const data = await response.json();
+                
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                const cardsGrid = document.getElementById('cardsGrid');
+                
+                if (data.success && data.publications && data.publications.length > 0) {
+                    // Remove loading indicator
+                    if (loadingIndicator) {
+                        loadingIndicator.remove();
+                    }
+                    
+                    // Generate cards from published content
+                    data.publications.forEach((pub, index) => {
+                        const card = createCard(pub, index);
+                        cardsGrid.appendChild(card);
+                    });
+                    
+                    console.log(`✅ 加载了 ${data.publications.length} 个已发布内容`);
+                } else {
+                    // Show static fallback cards if no published content
+                    if (loadingIndicator) {
+                        loadingIndicator.innerHTML = '<p style="font-size: 16px; color: #95a5a6;">暂无发布内容，显示默认示例</p>';
+                    }
+                    
+                    const staticCards = document.querySelectorAll('.static-card');
+                    staticCards.forEach(card => {
+                        card.style.display = 'block';
+                    });
+                    
+                    console.log('ℹ️ 没有发布内容，显示默认示例');
+                }
+                
+                // Setup hover effects
+                setupCardHoverEffects();
+                
+            } catch (error) {
+                console.error('❌ 加载发布内容失败:', error);
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) {
+                    loadingIndicator.innerHTML = '<p style="font-size: 16px; color: #e74c3c;">⚠️ 加载失败，请刷新页面重试</p>';
+                }
+            }
+        }
+
+        // Create card element from publication data
+        function createCard(pub, index) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-type', pub.type);
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            // Create click handler
+            card.onclick = function() {
+                window.open(pub.article_url, '_blank');
+            };
+            
+            // Build card HTML
+            card.innerHTML = `
+                <img src="${pub.cover_image}" alt="${pub.title}" class="card-image" 
+                     onerror="this.src='/workplace/share/backgrounds/whu.webp'">
+                <span class="card-badge ${badgeClasses[pub.type] || 'badge-article'}">${badgeLabels[pub.type] || pub.type}</span>
+                <div class="card-content">
+                    <h3 class="card-title">${escapeHtml(pub.title)}</h3>
+                    <p class="card-description">
+                        ${escapeHtml(pub.description)}
+                    </p>
+                    <div class="card-meta">
+                        <span class="card-date">📅 ${pub.publish_date}</span>
+                        <span class="card-author">👤 ${escapeHtml(pub.author)}</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Setup hover effects for cards
+        function setupCardHoverEffects() {
+            document.querySelectorAll('.card').forEach(card => {
+                if (!card.classList.contains('static-card')) {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-10px) scale(1.02)';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        this.style.transform = 'translateY(0) scale(1)';
+                    });
+                }
+            });
+        }
+
+        // Filter cards by type
+        function filterCards(type) {
+            const cards = document.querySelectorAll('.card:not(#loadingIndicator)');
+            const tabs = document.querySelectorAll('.nav-tab');
+            
+            // Update active tab
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter cards
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    if (card.getAttribute('data-type') === type) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Load content when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('武汉大学主页加载成功！');
+            console.log('访问路径: http://localhost:5000/home');
+            loadPublishedContent();
+        });
+    </script>
+</body>
+</html>
+

@@ -703,6 +703,14 @@
                     </div>
                 </div>
 
+                <!-- 发布内容 -->
+                <div class="sidebar-section">
+                    <div class="section-header" onclick="toggleSection('publish-content')">📤 发布内容</div>
+                    <div class="section-content" id="publish-content" style="display: none;">
+                        <button class="btn btn-secondary" onclick="showPublishModal()">📤 发布到主页</button>
+                    </div>
+                </div>
+                
                 <!-- 访客通道 -->
                 <div class="sidebar-section">
                     <div class="section-header" onclick="toggleSection('visitor-access')">🌐 访客通道</div>
@@ -962,6 +970,78 @@
                         <button class="btn btn-success" onclick="confirmChangePasswordCaptcha()" id="changePasswordCaptchaConfirm" disabled>确认</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发布内容模态框 -->
+    <div class="modal" id="publishModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>发布内容到主页</h3>
+                <button class="close-btn" onclick="closeModal('publishModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <h4>我的已发布内容</h4>
+                    <div id="publishedContentList">
+                        <div class="loading">加载已发布内容...</div>
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                    <h4>发布新内容</h4>
+                    <div class="property-group">
+                        <label class="property-label">选择文章</label>
+                        <select id="publishArticleSelect" class="property-input">
+                            <option value="">请选择文章</option>
+                        </select>
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">内容类型</label>
+                        <select id="publishType" class="property-input">
+                            <option value="article">📄 学术文章</option>
+                            <option value="blog">✍️ 校园博客</option>
+                            <option value="news">📰 新闻资讯</option>
+                        </select>
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">标题</label>
+                        <input type="text" id="publishTitle" class="property-input" placeholder="输入内容标题">
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">简介</label>
+                        <textarea id="publishDescription" class="property-input" rows="3" placeholder="输入内容简介（50-150字）"></textarea>
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">作者名称</label>
+                        <input type="text" id="publishAuthor" class="property-input" placeholder="输入作者名称">
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">封面图片</label>
+                        <select id="publishCoverImage" class="property-input">
+                            <option value="/workplace/share/backgrounds/whu.webp">武大校园</option>
+                            <option value="/workplace/share/backgrounds/petals_light.webp">樱花</option>
+                            <option value="/workplace/share/backgrounds/glasscurtains_light.webp">玻璃幕墙</option>
+                            <option value="/workplace/share/backgrounds/futurecity_light.webp">未来城市</option>
+                            <option value="/workplace/share/backgrounds/montclair_light.webp">蒙特克莱尔</option>
+                            <option value="/workplace/share/backgrounds/mermaid_light.webp">海洋</option>
+                            <option value="/workplace/share/backgrounds/flight_light.webp">飞行</option>
+                        </select>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 15px;">
+                        <button class="btn btn-success" onclick="publishContent()">📤 发布到主页</button>
+                    </div>
+                </div>
+                
+                <div id="publishErrorMessage" class="error-message" style="display: none;"></div>
+                <div id="publishSuccessMessage" class="success-message" style="display: none;"></div>
             </div>
         </div>
     </div>
@@ -3511,6 +3591,245 @@
             successElement.innerHTML = message;
             successElement.style.display = 'block';
             document.getElementById('visitorAccessErrorMessage').style.display = 'none';
+        }
+
+        // ==================== 发布内容功能 ====================
+        
+        // 显示发布内容模态框
+        function showPublishModal() {
+            console.log('显示发布内容模态框');
+            const modal = document.getElementById('publishModal');
+            modal.style.display = 'block';
+            
+            // 加载数据
+            loadPublishedContent();
+            loadArticlesForPublish();
+            
+            // 清空表单
+            document.getElementById('publishArticleSelect').value = '';
+            document.getElementById('publishType').value = 'article';
+            document.getElementById('publishTitle').value = '';
+            document.getElementById('publishDescription').value = '';
+            document.getElementById('publishAuthor').value = currentUser;
+            document.getElementById('publishCoverImage').value = '/workplace/share/backgrounds/whu.webp';
+            document.getElementById('publishErrorMessage').style.display = 'none';
+            document.getElementById('publishSuccessMessage').style.display = 'none';
+        }
+
+        // 加载已发布内容列表
+        async function loadPublishedContent() {
+            try {
+                const response = await fetch('/api/get_published_content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayPublishedContent(data.publications);
+                } else {
+                    document.getElementById('publishedContentList').innerHTML = 
+                        '<div class="empty-state"><p>加载失败: ' + data.message + '</p></div>';
+                }
+            } catch (error) {
+                console.error('加载已发布内容失败:', error);
+                document.getElementById('publishedContentList').innerHTML = 
+                    '<div class="empty-state"><p>网络错误，无法加载已发布内容</p></div>';
+            }
+        }
+
+        // 显示已发布内容列表
+        function displayPublishedContent(publications) {
+            const container = document.getElementById('publishedContentList');
+            
+            if (publications.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>还没有发布内容</p></div>';
+                return;
+            }
+            
+            const typeLabels = {
+                'article': '📄 学术文章',
+                'blog': '✍️ 校园博客',
+                'news': '📰 新闻资讯'
+            };
+            
+            let html = '<div style="max-height: 300px; overflow-y: auto;">';
+            publications.forEach(pub => {
+                html += `
+                    <div class="article-item" style="margin: 5px 0; padding: 12px; background: #f8f9fa; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 4px;">${pub.title}</div>
+                                <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 4px;">
+                                    ${typeLabels[pub.type] || pub.type} | ${pub.author}
+                                </div>
+                                <div style="font-size: 11px; color: #95a5a6;">${pub.article_file}</div>
+                            </div>
+                            <div style="flex: 0 0 auto; margin-left: 15px;">
+                                <button class="btn btn-secondary" onclick="unpublishContent('${pub.id}')" 
+                                        style="padding: 4px 12px; font-size: 12px; background: #e74c3c; color: white; border: none;" 
+                                        onmouseover="this.style.background='#c0392b'" 
+                                        onmouseout="this.style.background='#e74c3c'">取消发布</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        // 加载文章列表供发布选择
+        async function loadArticlesForPublish() {
+            try {
+                const response = await fetch('/api/user_articles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: currentUser })
+                });
+                
+                const data = await response.json();
+                const select = document.getElementById('publishArticleSelect');
+                
+                // 清空现有选项
+                select.innerHTML = '<option value="">请选择文章</option>';
+                
+                if (data.success && data.articles) {
+                    data.articles.forEach(article => {
+                        const option = document.createElement('option');
+                        option.value = article.filename;
+                        option.textContent = article.name;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('加载文章列表失败:', error);
+            }
+        }
+
+        // 发布内容
+        async function publishContent() {
+            const articleFile = document.getElementById('publishArticleSelect').value;
+            const type = document.getElementById('publishType').value;
+            const title = document.getElementById('publishTitle').value.trim();
+            const description = document.getElementById('publishDescription').value.trim();
+            const author = document.getElementById('publishAuthor').value.trim();
+            const coverImage = document.getElementById('publishCoverImage').value;
+            
+            // 验证输入
+            if (!articleFile) {
+                showPublishError('请选择要发布的文章');
+                return;
+            }
+            
+            if (!title) {
+                showPublishError('请输入标题');
+                return;
+            }
+            
+            if (!description) {
+                showPublishError('请输入简介');
+                return;
+            }
+            
+            if (description.length < 20 || description.length > 200) {
+                showPublishError('简介长度应在20-200字之间');
+                return;
+            }
+            
+            if (!author) {
+                showPublishError('请输入作者名称');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/publish_content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: currentUser,
+                        article_file: articleFile,
+                        type: type,
+                        title: title,
+                        description: description,
+                        author: author,
+                        cover_image: coverImage
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showPublishSuccess('内容发布成功！');
+                    loadPublishedContent();
+                    
+                    // 清空表单
+                    document.getElementById('publishArticleSelect').value = '';
+                    document.getElementById('publishTitle').value = '';
+                    document.getElementById('publishDescription').value = '';
+                } else {
+                    showPublishError('发布失败: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('发布内容失败:', error);
+                showPublishError('网络错误，请重试');
+            }
+        }
+
+        // 取消发布内容
+        async function unpublishContent(publicationId) {
+            if (!confirm('确定要取消发布此内容吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/unpublish_content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUser,
+                        publication_id: publicationId
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showPublishSuccess('已取消发布');
+                    loadPublishedContent();
+                } else {
+                    showPublishError('取消发布失败: ' + data.message);
+                }
+                
+            } catch (error) {
+                console.error('取消发布失败:', error);
+                showPublishError('网络错误，请重试');
+            }
+        }
+
+        // 显示发布错误信息
+        function showPublishError(message) {
+            const errorElement = document.getElementById('publishErrorMessage');
+            errorElement.innerHTML = message;
+            errorElement.style.display = 'block';
+            document.getElementById('publishSuccessMessage').style.display = 'none';
+        }
+
+        // 显示发布成功信息
+        function showPublishSuccess(message) {
+            const successElement = document.getElementById('publishSuccessMessage');
+            successElement.innerHTML = message;
+            successElement.style.display = 'block';
+            document.getElementById('publishErrorMessage').style.display = 'none';
         }
     </script>
 </body>

@@ -2184,6 +2184,188 @@ def remove_visitor_link():
 # 添加修改密码验证码存储
 change_password_codes = {}
 
+# 📤 发布内容管理API
+
+def read_publications_csv():
+    """读取publications.csv文件"""
+    publications_csv_path = os.path.join('..', 'publications.csv')
+    publications = []
+    
+    if os.path.exists(publications_csv_path):
+        try:
+            with open(publications_csv_path, 'r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    publications.append(row)
+        except Exception as e:
+            print(f"❌ 读取publications.csv失败: {e}")
+    
+    return publications
+
+def write_publications_csv(publications):
+    """写入publications.csv文件"""
+    publications_csv_path = os.path.join('..', 'publications.csv')
+    try:
+        with open(publications_csv_path, 'w', newline='', encoding='utf-8') as file:
+            fieldnames = ['id', 'username', 'article_file', 'type', 'title', 'description', 'author', 'cover_image', 'publish_date']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(publications)
+        return True
+    except Exception as e:
+        print(f"❌ 写入publications.csv失败: {e}")
+        return False
+
+@app.route('/api/get_published_content', methods=['POST'])
+def get_published_content():
+    """获取用户的已发布内容列表"""
+    try:
+        data = request.json
+        username = data.get('username', '').strip().lower()
+        
+        if not username:
+            return jsonify({'success': False, 'message': '用户名不能为空'})
+        
+        # 读取publications.csv
+        publications = read_publications_csv()
+        
+        # 筛选出属于当前用户的发布内容
+        user_publications = [pub for pub in publications if pub.get('username', '').lower() == username]
+        
+        print(f"📊 用户 {username} 有 {len(user_publications)} 个已发布内容")
+        return jsonify({
+            'success': True,
+            'publications': user_publications
+        })
+        
+    except Exception as e:
+        print(f"❌ 获取已发布内容失败: {e}")
+        return jsonify({'success': False, 'message': f'获取失败: {str(e)}'})
+
+@app.route('/api/publish_content', methods=['POST'])
+def publish_content():
+    """发布内容到主页"""
+    try:
+        data = request.json
+        username = data.get('username', '').strip().lower()
+        article_file = data.get('article_file', '').strip()
+        content_type = data.get('type', '').strip()
+        title = data.get('title', '').strip()
+        description = data.get('description', '').strip()
+        author = data.get('author', '').strip()
+        cover_image = data.get('cover_image', '').strip()
+        
+        # 验证参数
+        if not all([username, article_file, content_type, title, description, author]):
+            return jsonify({'success': False, 'message': '参数不完整'})
+        
+        # 检查文章是否存在
+        article_path = os.path.join('..', 'workplace', username, 'article', article_file)
+        if not os.path.exists(article_path):
+            return jsonify({'success': False, 'message': '文章不存在'})
+        
+        # 读取现有发布内容
+        publications = read_publications_csv()
+        
+        # 检查是否已经发布过该文章
+        for pub in publications:
+            if pub.get('username', '').lower() == username and pub.get('article_file') == article_file:
+                return jsonify({'success': False, 'message': '该文章已经发布过了'})
+        
+        # 生成唯一ID
+        import time
+        publication_id = f"{username}_{int(time.time() * 1000)}"
+        
+        # 获取当前日期
+        from datetime import datetime
+        publish_date = datetime.now().strftime('%Y-%m-%d')
+        
+        # 添加新发布记录
+        new_publication = {
+            'id': publication_id,
+            'username': username,
+            'article_file': article_file,
+            'type': content_type,
+            'title': title,
+            'description': description,
+            'author': author,
+            'cover_image': cover_image,
+            'publish_date': publish_date
+        }
+        
+        publications.append(new_publication)
+        
+        # 写回CSV文件
+        if write_publications_csv(publications):
+            print(f"✅ 用户 {username} 发布内容成功: {title}")
+            return jsonify({'success': True, 'message': '内容发布成功'})
+        else:
+            return jsonify({'success': False, 'message': '写入文件失败'})
+        
+    except Exception as e:
+        print(f"❌ 发布内容失败: {e}")
+        return jsonify({'success': False, 'message': f'发布失败: {str(e)}'})
+
+@app.route('/api/unpublish_content', methods=['POST'])
+def unpublish_content():
+    """取消发布内容"""
+    try:
+        data = request.json
+        username = data.get('username', '').strip().lower()
+        publication_id = data.get('publication_id', '').strip()
+        
+        if not username or not publication_id:
+            return jsonify({'success': False, 'message': '参数不完整'})
+        
+        # 读取现有发布内容
+        publications = read_publications_csv()
+        
+        # 找到要删除的记录
+        publication_to_remove = None
+        for pub in publications:
+            if pub.get('id') == publication_id and pub.get('username', '').lower() == username:
+                publication_to_remove = pub
+                break
+        
+        if not publication_to_remove:
+            return jsonify({'success': False, 'message': '发布内容不存在或无权限删除'})
+        
+        # 删除记录
+        publications.remove(publication_to_remove)
+        
+        # 写回CSV文件
+        if write_publications_csv(publications):
+            print(f"✅ 用户 {username} 取消发布成功: {publication_id}")
+            return jsonify({'success': True, 'message': '已取消发布'})
+        else:
+            return jsonify({'success': False, 'message': '写入文件失败'})
+        
+    except Exception as e:
+        print(f"❌ 取消发布失败: {e}")
+        return jsonify({'success': False, 'message': f'取消发布失败: {str(e)}'})
+
+@app.route('/api/get_all_publications', methods=['GET'])
+def get_all_publications():
+    """获取所有已发布内容（用于主页显示）"""
+    try:
+        # 读取所有发布内容
+        publications = read_publications_csv()
+        
+        # 转换文章路径为可访问的URL
+        for pub in publications:
+            username = pub.get('username', '')
+            article_file = pub.get('article_file', '')
+            pub['article_url'] = f"/link/{username}/{article_file}?from=home.html"
+        
+        return jsonify({
+            'success': True,
+            'publications': publications
+        })
+        
+    except Exception as e:
+        print(f"❌ 获取所有发布内容失败: {e}")
+        return jsonify({'success': False, 'message': f'获取失败: {str(e)}'})
+
 if __name__ == '__main__':
     print("🚀 HTML文章编辑器服务器启动...")
     print("📊 服务器配置:")
